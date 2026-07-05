@@ -2,15 +2,12 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using System.Collections;
 
-/// Encargado de cargar el Lobby o los minijuegos.
-/// Es un Singleton que persiste entre escenas.
-/// Debe existir UNA sola vez, idealmente junto al GameManager en la escena "Bootstrap".
 public class SceneLoader : MonoBehaviour
 {
     public static SceneLoader Instance { get; private set; }
 
-    [Header("Configuracion")]
-    [Tooltip("Nombre exacto de la escena del Lobby (debe estar agregada en Build Settings)")]
+    [Header("Configuración")]
+    public string mainMenuSceneName = "MainMenu";
     public string lobbySceneName = "Lobby";
 
     void Awake()
@@ -24,6 +21,12 @@ public class SceneLoader : MonoBehaviour
         DontDestroyOnLoad(gameObject);
     }
 
+    void Start()
+    {
+        // Solo el Bootstrap debe disparar esto (ver Paso 4)
+        StartCoroutine(LoadSceneAsync(mainMenuSceneName));
+    }
+
     public void LoadMinigame(string sceneName)
     {
         if (GameManager.Instance != null)
@@ -35,6 +38,11 @@ public class SceneLoader : MonoBehaviour
     public void LoadLobby()
     {
         StartCoroutine(LoadSceneAsync(lobbySceneName));
+    }
+
+    public void LoadMainMenu()
+    {
+        StartCoroutine(LoadSceneAsync(mainMenuSceneName));
     }
 
     private IEnumerator LoadSceneAsync(string sceneName)
