@@ -19,17 +19,29 @@ public class ThirdPersonCamera : MonoBehaviour
 
     private void Start()
     {
-        Cursor.lockState = CursorLockMode.Locked;
-        Cursor.visible = false;
+        LockCursor(true);
     }
 
     private void LateUpdate()
     {
         if (target == null) return;
+        if (target == transform) return;
 
-        yaw += Input.GetAxis("Mouse X") * sensitivity;
-        pitch -= Input.GetAxis("Mouse Y") * sensitivity;
-        pitch = Mathf.Clamp(pitch, minPitch, maxPitch);
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            LockCursor(false);
+        }
+        else if (Input.GetMouseButtonDown(0))
+        {
+            LockCursor(true);
+        }
+
+        if (Cursor.lockState == CursorLockMode.Locked)
+        {
+            yaw += Input.GetAxis("Mouse X") * sensitivity;
+            pitch -= Input.GetAxis("Mouse Y") * sensitivity;
+            pitch = Mathf.Clamp(pitch, minPitch, maxPitch);
+        }
 
         Quaternion rotation = Quaternion.Euler(pitch, yaw, 0f);
         Vector3 desiredPosition = target.position + rotation * offset;
@@ -41,5 +53,11 @@ public class ThirdPersonCamera : MonoBehaviour
         );
 
         transform.LookAt(target.position + Vector3.up * 1.5f);
+    }
+
+    private static void LockCursor(bool locked)
+    {
+        Cursor.lockState = locked ? CursorLockMode.Locked : CursorLockMode.None;
+        Cursor.visible = !locked;
     }
 }
