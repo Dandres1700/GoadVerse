@@ -7,7 +7,7 @@ public class SceneLoader : MonoBehaviour
     public static SceneLoader Instance { get; private set; }
 
     [Header("Configuración")]
-    public string mainMenuSceneName = "MainMenu";
+    public string mainMenuSceneName = "Menu_Principal";
     public string lobbySceneName = "Lobby";
 
     void Awake()

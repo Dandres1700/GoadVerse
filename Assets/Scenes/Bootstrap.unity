@@ -412,7 +412,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d2793cc4f5166fd44918fca14bb0d47e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SceneLoader
-  mainMenuSceneName: MainMenu
+  mainMenuSceneName: Menu_Principal
   lobbySceneName: Lobby
 --- !u!4 &1006734471
 Transform:
