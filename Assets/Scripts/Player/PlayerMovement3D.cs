@@ -1,8 +1,11 @@
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 [RequireComponent(typeof(CharacterController))]
 public class PlayerMovement3D : MonoBehaviour
 {
+    private static PlayerMovement3D Instance;
+
     private static readonly int SpeedHash = Animator.StringToHash("Speed");
     private static readonly int IsGroundedHash = Animator.StringToHash("IsGrounded");
     private static readonly int VerticalSpeedHash = Animator.StringToHash("VerticalSpeed");
@@ -33,6 +36,10 @@ public class PlayerMovement3D : MonoBehaviour
     public Transform cameraTransform;
     public Animator animator;
 
+    [Header("Escenas")]
+    [SerializeField] private bool persistAcrossScenes = true;
+    [SerializeField] private string mainMenuSceneName = "Menu_Principal";
+
     [Header("Camara")]
     [SerializeField] private bool keepCameraFollowingPlayer = true;
     [SerializeField] private Vector3 cameraFollowOffset = new Vector3(0f, 3f, -6f);
@@ -61,14 +68,23 @@ public class PlayerMovement3D : MonoBehaviour
 
     private void Awake()
     {
-        controller = GetComponent<CharacterController>();
-        spawnPosition = transform.position;
-        spawnRotation = transform.rotation;
-
-        if (cameraTransform == null && Camera.main != null)
+        if (persistAcrossScenes && Instance != null && Instance != this)
         {
-            cameraTransform = Camera.main.transform;
+            Destroy(gameObject);
+            return;
         }
+
+        if (persistAcrossScenes)
+        {
+            Instance = this;
+            DontDestroyOnLoad(gameObject);
+            SceneManager.sceneLoaded += HandleSceneLoaded;
+        }
+
+        controller = GetComponent<CharacterController>();
+        SetRespawnPoint(transform.position, transform.rotation);
+
+        RefreshCameraReference();
 
         if (animator == null)
         {
@@ -81,6 +97,28 @@ public class PlayerMovement3D : MonoBehaviour
         }
 
         ConfigureCameraFollow();
+    }
+
+    private void OnDestroy()
+    {
+        if (Instance != this) return;
+
+        SceneManager.sceneLoaded -= HandleSceneLoaded;
+        Instance = null;
+    }
+
+    private void HandleSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        if (scene.name == mainMenuSceneName)
+        {
+            Destroy(gameObject);
+            return;
+        }
+
+        RefreshCameraReference();
+        ConfigureCameraFollow();
+        SetRespawnPoint(transform.position, transform.rotation);
+        verticalVelocity = Vector3.zero;
     }
 
     private void Update()
@@ -171,6 +209,12 @@ public class PlayerMovement3D : MonoBehaviour
         controller.enabled = true;
     }
 
+    private void SetRespawnPoint(Vector3 position, Quaternion rotation)
+    {
+        spawnPosition = position;
+        spawnRotation = rotation;
+    }
+
     private Vector2 GetMovementInput()
     {
         float horizontal = 0f;
@@ -227,6 +271,14 @@ public class PlayerMovement3D : MonoBehaviour
 
         thirdPersonCamera.target = transform;
         thirdPersonCamera.offset = cameraFollowOffset;
+    }
+
+    private void RefreshCameraReference()
+    {
+        if (Camera.main != null)
+        {
+            cameraTransform = Camera.main.transform;
+        }
     }
 
     private void UpdateAnimations(Vector2 input, bool isRunning)
