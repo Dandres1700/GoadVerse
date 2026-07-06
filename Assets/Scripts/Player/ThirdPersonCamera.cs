@@ -1,28 +1,29 @@
 using UnityEngine;
 
-/// Camara orbital simple en tercera persona.
-/// Ponla en la Main Camera y asigna el Transform del jugador en "target".
-
 public class ThirdPersonCamera : MonoBehaviour
 {
     [Header("Objetivo")]
-    public Transform target; // El jugador
+    public Transform target;
 
-    [Header("Configuracion")]
-    public Vector3 offset = new Vector3(0f, 2.5f, -4.5f);
+    [Header("Posición")]
+    public Vector3 offset = new Vector3(0f, 3f, -6f);
+    public float smoothSpeed = 10f;
+
+    [Header("Rotación")]
     public float sensitivity = 3f;
     public float minPitch = -20f;
     public float maxPitch = 60f;
 
     private float yaw;
-    private float pitch = 15f;
+    private float pitch = 20f;
 
-    void Start()
+    private void Start()
     {
         Cursor.lockState = CursorLockMode.Locked;
+        Cursor.visible = false;
     }
 
-    void LateUpdate()
+    private void LateUpdate()
     {
         if (target == null) return;
 
@@ -33,7 +34,12 @@ public class ThirdPersonCamera : MonoBehaviour
         Quaternion rotation = Quaternion.Euler(pitch, yaw, 0f);
         Vector3 desiredPosition = target.position + rotation * offset;
 
-        transform.position = desiredPosition;
+        transform.position = Vector3.Lerp(
+            transform.position,
+            desiredPosition,
+            smoothSpeed * Time.deltaTime
+        );
+
         transform.LookAt(target.position + Vector3.up * 1.5f);
     }
 }
