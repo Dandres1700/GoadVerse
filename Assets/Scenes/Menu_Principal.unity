@@ -292,7 +292,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 13, y: -41.58029}
+  m_AnchoredPosition: {x: -532, y: -28.580292}
   m_SizeDelta: {x: 561.8655, y: 117.0679}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &267775671
@@ -723,15 +723,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1151388028547126963, guid: 206482bbeef9d0c42bf81fbd11dfde26, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 0.73
+      value: 2.04
       objectReference: {fileID: 0}
     - target: {fileID: 1151388028547126963, guid: 206482bbeef9d0c42bf81fbd11dfde26, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0.11
+      value: -0.7
       objectReference: {fileID: 0}
     - target: {fileID: 1151388028547126963, guid: 206482bbeef9d0c42bf81fbd11dfde26, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 3.074
+      value: 3.57
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -774,7 +774,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 13, y: -238.52463}
+  m_AnchoredPosition: {x: -532, y: -225.52463}
   m_SizeDelta: {x: 561.8655, y: 117.0679}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &843047042
@@ -1087,6 +1087,56 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1623265147}
   m_CullTransparentMesh: 1
+--- !u!1 &1642040010
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1642040011}
+  - component: {fileID: 1642040012}
+  m_Layer: 0
+  m_Name: CopaRotator
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1642040011
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1642040010}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1642040012
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1642040010}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d7b6a1ec2d8b4f4e8d94f859e42656a8, type: 3}
+  m_Name:
+  m_EditorClassIdentifier:
+  target: {fileID: 0}
+  targetName: Copa mundial (1)
+  rotationAxis: {x: 0, y: 1, z: 0}
+  degreesPerSecond: 12
+  rotationSpace: 1
+  useRendererCenterAsPivot: 1
 --- !u!1 &1837380387
 GameObject:
   m_ObjectHideFlags: 0
@@ -1410,7 +1460,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 13, y: 120}
+  m_AnchoredPosition: {x: -532, y: 133}
   m_SizeDelta: {x: 561.8655, y: 117.0679}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &2057399675
@@ -1517,3 +1567,4 @@ SceneRoots:
   - {fileID: 1837380389}
   - {fileID: 1874317158}
   - {fileID: 817715812}
+  - {fileID: 1642040011}
