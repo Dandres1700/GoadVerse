@@ -675,15 +675,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 206482bbeef9d0c42bf81fbd11dfde26, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 736
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 206482bbeef9d0c42bf81fbd11dfde26, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 49
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 206482bbeef9d0c42bf81fbd11dfde26, type: 3}
       propertyPath: m_LocalPosition.z
-      value: -1090
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 206482bbeef9d0c42bf81fbd11dfde26, type: 3}
       propertyPath: m_LocalRotation.w
@@ -1133,10 +1133,20 @@ MonoBehaviour:
   m_EditorClassIdentifier:
   target: {fileID: 0}
   targetName: Copa mundial (1)
-  rotationAxis: {x: 0, y: 1, z: 0}
   degreesPerSecond: 12
-  rotationSpace: 1
-  useRendererCenterAsPivot: 1
+  fixedLocalPosition: {x: 2.04, y: -0.7, z: 3.57}
+  fixedLocalScale: {x: 400, y: 400, z: 450}
+  forceExactLocalPosition: 1
+  forceExactLocalScale: 1
+  rotateOnlyOnY: 1
+  fixedRootEulerAngles: {x: 0, y: 0, z: 0}
+  forceRootRotation: 1
+  rotateVisualModel: 1
+  centerVisualChildren: 1
+  frameMainCamera: 1
+  menuCameraPosition: {x: 0, y: 500, z: -900}
+  menuCameraEulerAngles: {x: 0, y: 0, z: 0}
+  menuCameraFarClip: 3000
 --- !u!1 &1837380387
 GameObject:
   m_ObjectHideFlags: 0
@@ -1346,7 +1356,7 @@ Camera:
     width: 1
     height: 1
   near clip plane: 0.3
-  far clip plane: 1000
+  far clip plane: 3000
   field of view: 60
   orthographic: 0
   orthographic size: 5
@@ -1374,7 +1384,7 @@ Transform:
   m_GameObject: {fileID: 1994328662}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 1, z: -10}
+  m_LocalPosition: {x: 0, y: 500, z: -900}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []

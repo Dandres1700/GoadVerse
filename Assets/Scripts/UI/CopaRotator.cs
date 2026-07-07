@@ -7,46 +7,81 @@ public class CopaRotator : MonoBehaviour
     [SerializeField] private string targetName = "Copa mundial (1)";
 
     [Header("Rotation")]
-    [SerializeField] private Vector3 rotationAxis = Vector3.up;
     [SerializeField] private float degreesPerSecond = 12f;
-    [SerializeField] private Space rotationSpace = Space.Self;
-    [SerializeField] private bool useRendererCenterAsPivot = true;
+    [SerializeField] private Vector3 fixedLocalPosition = new Vector3(2.04f, -0.7f, 3.57f);
+    [SerializeField] private Vector3 fixedLocalScale = new Vector3(400f, 400f, 450f);
+    [SerializeField] private bool forceExactLocalPosition = true;
+    [SerializeField] private bool forceExactLocalScale = true;
+    [SerializeField] private bool rotateOnlyOnY = true;
+    [SerializeField] private Vector3 fixedRootEulerAngles = Vector3.zero;
+    [SerializeField] private bool forceRootRotation = true;
+    [SerializeField] private bool rotateVisualModel = true;
+    [SerializeField] private bool centerVisualChildren = true;
 
-    private Vector3 localPivot;
-    private bool hasLocalPivot;
+    [Header("Menu Camera")]
+    [SerializeField] private bool frameMainCamera = true;
+    [SerializeField] private Vector3 menuCameraPosition = new Vector3(0f, 500f, -900f);
+    [SerializeField] private Vector3 menuCameraEulerAngles = Vector3.zero;
+    [SerializeField] private float menuCameraFarClip = 3000f;
+
+    private float currentYRotation;
+    private bool hasCurrentRotation;
+    private bool cameraConfigured;
+    private Transform visualPivot;
+    private Transform rotationTarget;
+    private bool rotationTargetReady;
 
     private void Start()
     {
         ResolveTarget();
-        CacheLocalPivot();
+        ApplyFixedRootTransform();
+        SetupRotationTarget();
+        CacheCurrentRotation();
+        ConfigureMenuCamera();
     }
 
-    private void Update()
+    private void LateUpdate()
     {
+        if (!cameraConfigured)
+        {
+            ConfigureMenuCamera();
+        }
+
         if (target == null)
         {
             ResolveTarget();
-            CacheLocalPivot();
+            CacheCurrentRotation();
         }
 
         if (target == null) return;
 
-        if (!hasLocalPivot)
+        ApplyFixedRootTransform();
+        SetupRotationTarget();
+
+        if (!hasCurrentRotation)
         {
-            CacheLocalPivot();
+            CacheCurrentRotation();
         }
 
-        Vector3 axis = rotationAxis.sqrMagnitude > 0.0001f
-            ? rotationAxis.normalized
-            : Vector3.up;
-        Vector3 worldAxis = rotationSpace == Space.Self
-            ? target.TransformDirection(axis)
-            : axis;
-        Vector3 pivot = hasLocalPivot
-            ? target.TransformPoint(localPivot)
-            : target.position;
+        Transform rotatingTransform = GetRotationTarget();
 
-        target.RotateAround(pivot, worldAxis.normalized, degreesPerSecond * Time.deltaTime);
+        if (rotatingTransform == null) return;
+
+        currentYRotation += degreesPerSecond * Time.deltaTime;
+        currentYRotation = Mathf.Repeat(currentYRotation, 360f);
+
+        if (rotateOnlyOnY)
+        {
+            rotatingTransform.localEulerAngles = new Vector3(0f, currentYRotation, 0f);
+        }
+        else
+        {
+            rotatingTransform.localEulerAngles = new Vector3(
+                rotatingTransform.localEulerAngles.x,
+                currentYRotation,
+                rotatingTransform.localEulerAngles.z
+            );
+        }
     }
 
     private void ResolveTarget()
@@ -62,21 +97,87 @@ public class CopaRotator : MonoBehaviour
         }
     }
 
-    private void CacheLocalPivot()
+    private void ApplyFixedRootTransform()
     {
-        hasLocalPivot = false;
-        localPivot = Vector3.zero;
+        if (target == null) return;
 
-        if (target == null || !useRendererCenterAsPivot)
+        if (forceExactLocalPosition)
         {
+            target.localPosition = fixedLocalPosition;
+        }
+
+        if (forceExactLocalScale)
+        {
+            target.localScale = fixedLocalScale;
+        }
+
+        if (forceRootRotation)
+        {
+            target.localEulerAngles = fixedRootEulerAngles;
+        }
+    }
+
+    private void SetupRotationTarget()
+    {
+        if (target == null || rotationTargetReady) return;
+
+        if (!rotateVisualModel || target.childCount == 0)
+        {
+            rotationTarget = target;
+            rotationTargetReady = true;
             return;
         }
 
+        if (centerVisualChildren)
+        {
+            CenterDirectVisualChildren();
+        }
+
+        Transform[] children = new Transform[target.childCount];
+
+        for (int i = 0; i < target.childCount; i++)
+        {
+            children[i] = target.GetChild(i);
+        }
+
+        Vector3 visualCenter = GetRendererCenter();
+        GameObject pivotObject = new GameObject($"{target.name} Visual Pivot");
+        visualPivot = pivotObject.transform;
+        visualPivot.SetParent(target, false);
+        visualPivot.SetPositionAndRotation(visualCenter, target.rotation);
+
+        foreach (Transform child in children)
+        {
+            if (child != null && child != visualPivot)
+            {
+                child.SetParent(visualPivot, true);
+            }
+        }
+
+        rotationTarget = visualPivot;
+        rotationTargetReady = true;
+    }
+
+    private void CenterDirectVisualChildren()
+    {
+        for (int i = 0; i < target.childCount; i++)
+        {
+            Transform child = target.GetChild(i);
+
+            if (child == visualPivot) continue;
+
+            child.localPosition = Vector3.zero;
+            child.localRotation = Quaternion.identity;
+        }
+    }
+
+    private Vector3 GetRendererCenter()
+    {
         Renderer[] renderers = target.GetComponentsInChildren<Renderer>();
 
         if (renderers.Length == 0)
         {
-            return;
+            return target.position;
         }
 
         Bounds bounds = renderers[0].bounds;
@@ -86,12 +187,49 @@ public class CopaRotator : MonoBehaviour
             bounds.Encapsulate(renderers[i].bounds);
         }
 
-        localPivot = target.InverseTransformPoint(bounds.center);
-        hasLocalPivot = true;
+        return bounds.center;
+    }
+
+    private Transform GetRotationTarget()
+    {
+        return rotationTarget != null ? rotationTarget : target;
+    }
+
+    private void CacheCurrentRotation()
+    {
+        hasCurrentRotation = false;
+
+        Transform rotatingTransform = GetRotationTarget();
+
+        if (rotatingTransform == null) return;
+
+        currentYRotation = rotatingTransform.localEulerAngles.y;
+        hasCurrentRotation = true;
+    }
+
+    private void ConfigureMenuCamera()
+    {
+        if (!frameMainCamera)
+        {
+            cameraConfigured = true;
+            return;
+        }
+
+        Camera mainCamera = Camera.main;
+
+        if (mainCamera == null) return;
+
+        mainCamera.transform.SetPositionAndRotation(
+            menuCameraPosition,
+            Quaternion.Euler(menuCameraEulerAngles)
+        );
+        mainCamera.farClipPlane = menuCameraFarClip;
+        cameraConfigured = true;
     }
 
     private void OnValidate()
     {
         degreesPerSecond = Mathf.Max(0f, degreesPerSecond);
+        menuCameraFarClip = Mathf.Max(0.3f, menuCameraFarClip);
     }
 }
