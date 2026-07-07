@@ -14,11 +14,17 @@ public class ThirdPersonCamera : MonoBehaviour
     public float minPitch = -20f;
     public float maxPitch = 60f;
 
+    [Header("Zoom")]
+    public float minZoomDistance = 2.5f;
+    public float maxZoomDistance = 10f;
+    public float zoomSpeed = 6f;
+
     private float yaw;
     private float pitch = 20f;
 
     private void Start()
     {
+        ClampZoomDistance();
         LockCursor(true);
     }
 
@@ -43,6 +49,8 @@ public class ThirdPersonCamera : MonoBehaviour
             pitch = Mathf.Clamp(pitch, minPitch, maxPitch);
         }
 
+        HandleZoom();
+
         Quaternion rotation = Quaternion.Euler(pitch, yaw, 0f);
         Vector3 desiredPosition = target.position + rotation * offset;
 
@@ -53,6 +61,30 @@ public class ThirdPersonCamera : MonoBehaviour
         );
 
         transform.LookAt(target.position + Vector3.up * 1.5f);
+    }
+
+    private void HandleZoom()
+    {
+        float scroll = Input.GetAxis("Mouse ScrollWheel");
+
+        if (Mathf.Abs(scroll) <= 0.001f) return;
+
+        float zoomDirection = offset.z < 0f ? -1f : 1f;
+        float zoomDistance = Mathf.Abs(offset.z);
+        zoomDistance = Mathf.Clamp(
+            zoomDistance - scroll * zoomSpeed,
+            minZoomDistance,
+            maxZoomDistance
+        );
+
+        offset.z = zoomDistance * zoomDirection;
+    }
+
+    private void ClampZoomDistance()
+    {
+        float zoomDirection = offset.z < 0f ? -1f : 1f;
+        float zoomDistance = Mathf.Clamp(Mathf.Abs(offset.z), minZoomDistance, maxZoomDistance);
+        offset.z = zoomDistance * zoomDirection;
     }
 
     private static void LockCursor(bool locked)

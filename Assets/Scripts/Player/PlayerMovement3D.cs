@@ -124,12 +124,13 @@ public class PlayerMovement3D : MonoBehaviour
     private void Update()
     {
         jumpStartedThisFrame = false;
+        bool wasGrounded = controller.isGrounded;
 
         Vector2 input = GetMovementInput();
         bool isRunning = GetRunInput();
 
         MovePlayer(input, isRunning);
-        ApplyGravityAndJump();
+        ApplyGravityAndJump(wasGrounded);
         RespawnIfNeeded();
         UpdateAnimations(input, isRunning);
     }
@@ -167,10 +168,8 @@ public class PlayerMovement3D : MonoBehaviour
         }
     }
 
-    private void ApplyGravityAndJump()
+    private void ApplyGravityAndJump(bool isGrounded)
     {
-        bool isGrounded = controller.isGrounded;
-
         if (isGrounded && verticalVelocity.y < 0f)
         {
             verticalVelocity.y = -2f;
