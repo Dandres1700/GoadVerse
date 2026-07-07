@@ -9,38 +9,37 @@ public class GoalkeeperMovement : MonoBehaviour
 
     private CharacterController controller;
 
-    void Start()
+    public Vector3 MoveDirection { get; set; }
+
+    // 0 = Frontal, 1 = Lateral
+    public float AnimationDirection { get; set; }
+
+    private void Awake()
     {
         controller = GetComponent<CharacterController>();
     }
 
-    void Update()
+    private void Update()
     {
-        float x = Input.GetAxisRaw("Horizontal");
-        float z = Input.GetAxisRaw("Vertical");
-
-        Vector3 movimiento = new Vector3(x, 0, z).normalized;
+        Vector3 movimiento = MoveDirection.normalized;
 
         controller.Move(movimiento * speed * Time.deltaTime);
 
-        // Si el movimiento es principalmente frontal, rotar al personaje
-        if (movimiento.magnitude > 0.1f && Mathf.Abs(z) >= Mathf.Abs(x))
+        if (movimiento.magnitude > 0.1f &&
+            Mathf.Abs(movimiento.x) >= Mathf.Abs(movimiento.z))
         {
-            Quaternion rotacionObjetivo = Quaternion.LookRotation(movimiento);
+            Quaternion objetivo = Quaternion.LookRotation(movimiento);
+
             transform.rotation = Quaternion.Slerp(
                 transform.rotation,
-                rotacionObjetivo,
+                objetivo,
                 rotationSpeed * Time.deltaTime
             );
         }
 
-        // Animaciones
         animator.SetFloat("Speed", movimiento.magnitude);
-
-        if (Mathf.Abs(x) > Mathf.Abs(z))
-            animator.SetFloat("Direccion", 1); // Lateral
-        else
-            animator.SetFloat("Direccion", 0); // Frontal
+        animator.SetFloat("Direccion", AnimationDirection);
     }
+
 }
 
