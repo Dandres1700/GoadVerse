@@ -1,5 +1,8 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
+#if ENABLE_INPUT_SYSTEM
+using UnityEngine.InputSystem;
+#endif
 
 /// Portal que envia al jugador desde el Lobby hacia un minijuego.
 /// Requiere un Collider marcado como Trigger en el mismo GameObject.
@@ -22,6 +25,12 @@ public class MinigamePortal : MonoBehaviour
 
     [Tooltip("Tecla que activa el portal cuando el jugador esta cerca.")]
     public KeyCode interactionKey = KeyCode.E;
+
+    [Tooltip("Permite activar el portal con mando ademas de la tecla.")]
+    public bool allowGamepadInteraction = true;
+
+    [Tooltip("Boton principal del mando para activar el portal.")]
+    public KeyCode gamepadInteractionButton = KeyCode.JoystickButton0;
 
     [Tooltip("Evita cargar varias veces si el jugador toca el portal mas de una vez.")]
     public bool disableAfterUse = true;
@@ -138,10 +147,40 @@ public class MinigamePortal : MonoBehaviour
 
     private void TryLoadTargetScene()
     {
-        if (requireInteractionKey && !Input.GetKeyDown(interactionKey))
+        if (requireInteractionKey && !GetInteractionInputDown())
             return;
 
         LoadTargetScene();
+    }
+
+    private bool GetInteractionInputDown()
+    {
+        if (Input.GetKeyDown(interactionKey))
+            return true;
+
+        if (!allowGamepadInteraction)
+            return false;
+
+#if ENABLE_INPUT_SYSTEM
+        if (Gamepad.current != null && Gamepad.current.buttonSouth.wasPressedThisFrame)
+            return true;
+#endif
+
+        return Input.GetKeyDown(gamepadInteractionButton)
+            || GetButtonDownSafe("Submit")
+            || GetButtonDownSafe("Fire1");
+    }
+
+    private static bool GetButtonDownSafe(string buttonName)
+    {
+        try
+        {
+            return Input.GetButtonDown(buttonName);
+        }
+        catch (System.ArgumentException)
+        {
+            return false;
+        }
     }
 
     private void LoadTargetScene()
