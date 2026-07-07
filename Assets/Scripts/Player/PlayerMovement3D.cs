@@ -1,5 +1,8 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
+#if ENABLE_INPUT_SYSTEM
+using UnityEngine.InputSystem;
+#endif
 
 [RequireComponent(typeof(CharacterController))]
 public class PlayerMovement3D : MonoBehaviour
@@ -53,6 +56,13 @@ public class PlayerMovement3D : MonoBehaviour
     [Header("Animacion")]
     [SerializeField] private float animationDampTime = 0.1f;
     [SerializeField] private bool disableAnimatorRootMotion = true;
+
+    [Header("Mando")]
+    [SerializeField] private bool enableGamepadInput = true;
+    [SerializeField] private float gamepadDeadZone = 0.2f;
+    [SerializeField] private KeyCode gamepadJumpButton = KeyCode.JoystickButton0;
+    [SerializeField] private KeyCode gamepadRunButton = KeyCode.JoystickButton4;
+    [SerializeField] private KeyCode alternateGamepadRunButton = KeyCode.JoystickButton5;
 
     private CharacterController controller;
     private Vector3 verticalVelocity;
@@ -234,27 +244,146 @@ public class PlayerMovement3D : MonoBehaviour
             if (Input.GetKey(KeyCode.DownArrow)) vertical = -1f;
         }
 
-        return new Vector2(horizontal, vertical);
+        Vector2 keyboardInput = new Vector2(horizontal, vertical);
+        Vector2 gamepadInput = GetGamepadMovementInput();
+        Vector2 input = gamepadInput.sqrMagnitude > keyboardInput.sqrMagnitude
+            ? gamepadInput
+            : keyboardInput;
+
+        return Vector2.ClampMagnitude(input, 1f);
     }
 
     private bool GetRunInput()
     {
+        bool keyboardRun;
+
         if (controlType == PlayerControlType.Player1_WASD)
         {
-            return Input.GetKey(KeyCode.LeftShift);
+            keyboardRun = Input.GetKey(KeyCode.LeftShift);
+        }
+        else
+        {
+            keyboardRun = Input.GetKey(KeyCode.RightShift);
         }
 
-        return Input.GetKey(KeyCode.RightShift);
+        return keyboardRun || GetGamepadRunInput();
     }
 
     private bool GetJumpInput()
     {
+        bool keyboardJump;
+
         if (controlType == PlayerControlType.Player1_WASD)
         {
-            return Input.GetKeyDown(KeyCode.Space);
+            keyboardJump = Input.GetKeyDown(KeyCode.Space);
+        }
+        else
+        {
+            keyboardJump = Input.GetKeyDown(KeyCode.Return);
         }
 
-        return Input.GetKeyDown(KeyCode.Return);
+        return keyboardJump || GetGamepadJumpInput();
+    }
+
+    private Vector2 GetGamepadMovementInput()
+    {
+        if (!enableGamepadInput) return Vector2.zero;
+
+        Vector2 input = Vector2.zero;
+
+#if ENABLE_INPUT_SYSTEM
+        if (Gamepad.current != null)
+        {
+            input = Gamepad.current.leftStick.ReadValue();
+        }
+#endif
+
+        if (input.sqrMagnitude <= gamepadDeadZone * gamepadDeadZone)
+        {
+            input = new Vector2(
+                GetAxisRawSafe("Horizontal"),
+                GetAxisRawSafe("Vertical")
+            );
+        }
+
+        if (input.sqrMagnitude <= gamepadDeadZone * gamepadDeadZone)
+        {
+            return Vector2.zero;
+        }
+
+        return Vector2.ClampMagnitude(input, 1f);
+    }
+
+    private bool GetGamepadRunInput()
+    {
+        if (!enableGamepadInput) return false;
+
+#if ENABLE_INPUT_SYSTEM
+        if (Gamepad.current != null
+            && (Gamepad.current.leftShoulder.isPressed
+                || Gamepad.current.rightShoulder.isPressed
+                || Gamepad.current.leftStickButton.isPressed
+                || Gamepad.current.rightTrigger.ReadValue() > 0.5f))
+        {
+            return true;
+        }
+#endif
+
+        return Input.GetKey(gamepadRunButton)
+            || Input.GetKey(alternateGamepadRunButton)
+            || GetButtonSafe("Fire3");
+    }
+
+    private bool GetGamepadJumpInput()
+    {
+        if (!enableGamepadInput) return false;
+
+#if ENABLE_INPUT_SYSTEM
+        if (Gamepad.current != null && Gamepad.current.buttonSouth.wasPressedThisFrame)
+        {
+            return true;
+        }
+#endif
+
+        return Input.GetKeyDown(gamepadJumpButton)
+            || GetButtonDownSafe("Jump")
+            || GetButtonDownSafe("Submit");
+    }
+
+    private static float GetAxisRawSafe(string axisName)
+    {
+        try
+        {
+            return Input.GetAxisRaw(axisName);
+        }
+        catch (System.ArgumentException)
+        {
+            return 0f;
+        }
+    }
+
+    private static bool GetButtonSafe(string buttonName)
+    {
+        try
+        {
+            return Input.GetButton(buttonName);
+        }
+        catch (System.ArgumentException)
+        {
+            return false;
+        }
+    }
+
+    private static bool GetButtonDownSafe(string buttonName)
+    {
+        try
+        {
+            return Input.GetButtonDown(buttonName);
+        }
+        catch (System.ArgumentException)
+        {
+            return false;
+        }
     }
 
     private void ConfigureCameraFollow()

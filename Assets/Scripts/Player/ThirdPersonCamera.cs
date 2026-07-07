@@ -1,4 +1,7 @@
 using UnityEngine;
+#if ENABLE_INPUT_SYSTEM
+using UnityEngine.InputSystem;
+#endif
 
 public class ThirdPersonCamera : MonoBehaviour
 {
@@ -13,6 +16,11 @@ public class ThirdPersonCamera : MonoBehaviour
     public float sensitivity = 3f;
     public float minPitch = -20f;
     public float maxPitch = 60f;
+
+    [Header("Mando")]
+    [SerializeField] private bool enableGamepadLook = true;
+    [SerializeField] private float gamepadLookSensitivity = 120f;
+    [SerializeField] private float gamepadLookDeadZone = 0.15f;
 
     [Header("Zoom")]
     public float minZoomDistance = 2.5f;
@@ -46,6 +54,10 @@ public class ThirdPersonCamera : MonoBehaviour
         {
             yaw += Input.GetAxis("Mouse X") * sensitivity;
             pitch -= Input.GetAxis("Mouse Y") * sensitivity;
+
+            Vector2 gamepadLook = GetGamepadLookInput();
+            yaw += gamepadLook.x * gamepadLookSensitivity * Time.deltaTime;
+            pitch -= gamepadLook.y * gamepadLookSensitivity * Time.deltaTime;
             pitch = Mathf.Clamp(pitch, minPitch, maxPitch);
         }
 
@@ -61,6 +73,25 @@ public class ThirdPersonCamera : MonoBehaviour
         );
 
         transform.LookAt(target.position + Vector3.up * 1.5f);
+    }
+
+    private Vector2 GetGamepadLookInput()
+    {
+        if (!enableGamepadLook) return Vector2.zero;
+
+#if ENABLE_INPUT_SYSTEM
+        if (Gamepad.current != null)
+        {
+            Vector2 look = Gamepad.current.rightStick.ReadValue();
+
+            if (look.sqrMagnitude > gamepadLookDeadZone * gamepadLookDeadZone)
+            {
+                return look;
+            }
+        }
+#endif
+
+        return Vector2.zero;
     }
 
     private void HandleZoom()
