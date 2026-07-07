@@ -4,6 +4,7 @@ using UnityEngine;
 public class GoalkeeperMovement : MonoBehaviour
 {
     public float speed = 3f;
+    public float rotationSpeed = 10f;
     public Animator animator;
 
     private CharacterController controller;
@@ -22,29 +23,24 @@ public class GoalkeeperMovement : MonoBehaviour
 
         controller.Move(movimiento * speed * Time.deltaTime);
 
-        if (movimiento != Vector3.zero)
+        // Si el movimiento es principalmente frontal, rotar al personaje
+        if (movimiento.magnitude > 0.1f && Mathf.Abs(z) >= Mathf.Abs(x))
         {
-            transform.forward = movimiento;
+            Quaternion rotacionObjetivo = Quaternion.LookRotation(movimiento);
+            transform.rotation = Quaternion.Slerp(
+                transform.rotation,
+                rotacionObjetivo,
+                rotationSpeed * Time.deltaTime
+            );
         }
-
 
         // Animaciones
-        float velocidad = movimiento.magnitude;
+        animator.SetFloat("Speed", movimiento.magnitude);
 
-        animator.SetFloat("Speed", velocidad);
-
-
-        // Detectar tipo de movimiento
         if (Mathf.Abs(x) > Mathf.Abs(z))
-        {
-            // Movimiento lateral
-            animator.SetFloat("Direccion", 1);
-        }
+            animator.SetFloat("Direccion", 1); // Lateral
         else
-        {
-            // Movimiento frontal
-            animator.SetFloat("Direccion", 0);
-        }
+            animator.SetFloat("Direccion", 0); // Frontal
     }
 }
 
