@@ -78,6 +78,7 @@ public class FootballOSAnimationDemoAuto : MonoBehaviour
         }
 
         uiController = FindAnyObjectByType<FootballOSUIController>();
+        commandSystem = FindAnyObjectByType<FootballOSCommandSystem>();
 
         PrepareBall();
 
@@ -646,7 +647,6 @@ yield return PassToMovingPlayer(
         uiController.SetEventLog(eventLog);
         uiController.SetControlData(playerInControl, nextAction);
     }
-
     private IEnumerator RunCommandMode(string commandName, KeyCode[] sequence, string player, string action, Action<CommandResult> onResult)
 {
     UpdateOSUI(
