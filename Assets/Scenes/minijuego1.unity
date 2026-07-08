@@ -542,7 +542,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Tactical Simulation Interface
+  m_text: Global Tactical Simulation
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -704,6 +704,37 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: bb96394e9629f20408ea23d3760ba123, type: 3}
+--- !u!1 &221133786
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 221133787}
+  m_Layer: 0
+  m_Name: MundialSystem_Manager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &221133787
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 221133786}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 80.46267, y: 324.95157, z: -91.46837}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &298907013
 GameObject:
   m_ObjectHideFlags: 0
@@ -1277,14 +1308,8 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 'STATUS: CONNECTED
-
-    MODE: AUTO PLAY SIMULATION
-
-    MATCH: ECUADOR
-    vs RIVAL
-
-    ENGINE: ACTIVE'
+  m_text: "Portal conectado...\r\nEstadio cargado...\r\nEquipo sincronizado...\r\nSimulaci\xF3n
+    t\xE1ctica activa."
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -2619,6 +2644,7 @@ GameObject:
   - component: {fileID: 1487876495}
   - component: {fileID: 1487876496}
   - component: {fileID: 1487876497}
+  - component: {fileID: 1487876498}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -2809,7 +2835,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1487876489}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: f87bfb90d356f6b4fb48ed3d9ad3dc10, type: 3}
   m_Name: 
@@ -2825,6 +2851,47 @@ MonoBehaviour:
   zoomSpeed: 6
   minDistance: 12
   maxDistance: 35
+--- !u!114 &1487876498
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1487876489}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2e6c4f01037187a42a0d9dff3842484b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MundialSystemCameraController
+  matchSceneName: minijuego1
+  ballName: Ball
+  manualPlayerName: HumanM_Model
+  playIntroOnStart: 1
+  introStartPosition: {x: -4, y: 18, z: -45}
+  introStartLookAt: {x: -4, y: 1, z: 0}
+  stadiumPosition: {x: -4, y: 24, z: -35}
+  stadiumLookAt: {x: -4, y: 0, z: 5}
+  teamsPosition: {x: -15, y: 10, z: -14}
+  teamsLookAt: {x: -4, y: 1, z: 5}
+  sideScanPosition: {x: -28, y: 14, z: -18}
+  sideScanLookAt: {x: -4, y: 1, z: 0}
+  goalkeeperPosition: {x: -4, y: 6, z: -30}
+  goalkeeperLookAt: {x: -4, y: 1, z: -18}
+  ballPosition: {x: -8, y: 5, z: -8}
+  ballLookAt: {x: -4, y: 1, z: 0}
+  firstShotTime: 0.4
+  stadiumShotTime: 0.7
+  teamsShotTime: 0.8
+  transitionTime: 0.55
+  tacticalDistance: 24
+  tacticalHeight: 13
+  tacticalYaw: 0
+  followSpeed: 7
+  lookHeight: 1.2
+  rotateSpeed: 90
+  zoomSpeed: 8
+  minDistance: 12
+  maxDistance: 40
 --- !u!1 &1501792855
 GameObject:
   m_ObjectHideFlags: 0
@@ -2882,9 +2949,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 'FOOTBALL OS
-
-'
+  m_text: MundialSystem
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -3147,8 +3212,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1779460904}
-  - component: {fileID: 1779460906}
   - component: {fileID: 1779460907}
+  - component: {fileID: 1779460908}
   m_Layer: 0
   m_Name: FootballOS_AnimationDemo
   m_TagString: Untagged
@@ -3171,14 +3236,26 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1779460906
+--- !u!114 &1779460907
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1779460902}
-  m_Enabled: 1
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 03205e433bd3e90418836c1317acc3b5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::FootballOSCommandOverlay
+--- !u!114 &1779460908
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1779460902}
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 9941332921668c14dbaf5af45d6e9d2e, type: 3}
   m_Name: 
@@ -3189,27 +3266,15 @@ MonoBehaviour:
   ballOffset: 0.9
   passArcHeight: 0.45
   centerX: -4
-  playerGoalZ: -22
-  rivalGoalZ: 24
-  supportMoveSpeed: 5
-  carrySpeed: 0.9
+  playerGoalZ: -14
+  rivalGoalZ: 15
+  supportMoveSpeed: 2.8
+  carrySpeed: 0.7
   loopMatch: 1
-  actionsPerPossession: 14
-  commandEveryActions: 7
-  minPassDistance: 6
-  maxPassDistance: 24
---- !u!114 &1779460907
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1779460902}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 03205e433bd3e90418836c1317acc3b5, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::FootballOSCommandOverlay
+  actionsPerPossession: 8
+  commandEveryActions: 3
+  minPassDistance: 3
+  maxPassDistance: 13
 --- !u!1001 &1823432683
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -4710,3 +4775,4 @@ SceneRoots:
   - {fileID: 964240386}
   - {fileID: 1928245084}
   - {fileID: 2127761919}
+  - {fileID: 221133787}
