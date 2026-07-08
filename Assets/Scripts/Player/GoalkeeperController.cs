@@ -159,9 +159,10 @@ public class GoalkeeperController : MonoBehaviour
 
         float horizontalDistance = Vector3.Distance(keeperFlat, ballFlat);
         float verticalDistance = ball.position.y - transform.position.y;
+        float scale = GetScaleMultiplier();
 
-        if (horizontalDistance > catchRadius) return;
-        if (verticalDistance < -0.25f || verticalDistance > catchVerticalLimit) return;
+        if (horizontalDistance > catchRadius * scale) return;
+        if (verticalDistance < -0.25f * scale || verticalDistance > catchVerticalLimit * scale) return;
 
         StartCatch();
     }
@@ -213,9 +214,11 @@ public class GoalkeeperController : MonoBehaviour
 
     private Vector3 GetBallHoldPosition()
     {
+        float scale = GetScaleMultiplier();
+
         return transform.position
-            + transform.forward * catchForwardOffset
-            + Vector3.up * catchHeight;
+            + transform.forward * catchForwardOffset * scale
+            + Vector3.up * catchHeight * scale;
     }
 
     private void ReleaseBall()
@@ -309,23 +312,34 @@ public class GoalkeeperController : MonoBehaviour
         if (ball == null || !isHoldingBall) return;
 
         Vector3 center = GetBallHoldPosition();
+        float scale = GetScaleMultiplier();
 
         animator.SetIKPositionWeight(AvatarIKGoal.LeftHand, 1f);
         animator.SetIKPositionWeight(AvatarIKGoal.RightHand, 1f);
-        animator.SetIKPosition(AvatarIKGoal.LeftHand, center - transform.right * handSpacing);
-        animator.SetIKPosition(AvatarIKGoal.RightHand, center + transform.right * handSpacing);
+        animator.SetIKPosition(AvatarIKGoal.LeftHand, center - transform.right * handSpacing * scale);
+        animator.SetIKPosition(AvatarIKGoal.RightHand, center + transform.right * handSpacing * scale);
     }
 
     private void OnDrawGizmosSelected()
     {
         Vector3 basePosition = useCurrentPositionAsHome ? transform.position : homePosition;
         Vector3 axis = GetFlatLateralAxis();
+        float scale = GetScaleMultiplier();
 
         Gizmos.color = Color.cyan;
         Gizmos.DrawLine(basePosition - axis * patrolDistance, basePosition + axis * patrolDistance);
 
         Gizmos.color = Color.yellow;
-        Gizmos.DrawWireSphere(basePosition + transform.forward * catchForwardOffset + Vector3.up * catchHeight, catchRadius);
+        Gizmos.DrawWireSphere(
+            basePosition + transform.forward * catchForwardOffset * scale + Vector3.up * catchHeight * scale,
+            catchRadius * scale
+        );
+    }
+
+    private float GetScaleMultiplier()
+    {
+        Vector3 scale = transform.lossyScale;
+        return Mathf.Max(0.01f, (Mathf.Abs(scale.x) + Mathf.Abs(scale.y) + Mathf.Abs(scale.z)) / 3f);
     }
 
     private void OnValidate()
