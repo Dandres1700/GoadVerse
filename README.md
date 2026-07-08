@@ -173,22 +173,15 @@ importados en este proyecto:
 - "8Bit Music - 062022" by GWriterStudio is imported under
   `Assets/Audio/8Bit Music - 062022`. The local notes credit GWriterStudio and
   list 10 tracks; confirm the original license/source before distributing.
+- Assets by genesismayuri:
+  - `Assets/Models/ballon/Ball.blend`
+  - `Assets/Textures/Menu_Inicio/Menu_Inicio.jpeg`
+  - `Assets/Textures/Menu_Inicio/Fondo/Fondo_Menu.png`
+  - `Assets/Textures/Botones/*.png`
+  - `Assets/Audio/BotonSonido.wav`
+  - `Assets/Audio/Inicio/Title_Juego.mp3`
+  - `Assets/Audio/8Bit Music - 062022/*.wav`
 - TextMesh Pro, Unity UI, Input System, URP and other Unity packages are provided by Unity Technologies under their package and Unity terms.
-
-## Recursos pendientes por confirmar
-
-Los siguientes recursos estan dentro del proyecto, pero no tienen una fuente o
-licencia externa documentada en los archivos locales. Si alguno fue descargado
-de un tercero, agregar aqui su autor, URL y licencia antes de publicar una
-version distribuible:
-
-- `Assets/Models/ballon/Ball.blend`
-- `Assets/Textures/Menu_Inicio/Menu_Inicio.jpeg`
-- `Assets/Textures/Menu_Inicio/Fondo/Fondo_Menu.png`
-- `Assets/Textures/Botones/*.png`
-- `Assets/Audio/BotonSonido.wav`
-- `Assets/Audio/Inicio/Title_Juego.mp3`
-- `Assets/Audio/8Bit Music - 062022/*.wav`
 
 ## Notas de licencia
 
