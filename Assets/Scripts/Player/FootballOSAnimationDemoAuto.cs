@@ -77,8 +77,12 @@ public class FootballOSAnimationDemoAuto : MonoBehaviour
             yield return null;
         }
 
+<<<<<<< HEAD
         uiController = FindFirstObjectByType<FootballOSUIController>();
         commandSystem = FindFirstObjectByType<FootballOSCommandSystem>();
+=======
+        uiController = FindAnyObjectByType<FootballOSUIController>();
+>>>>>>> 41ef0efe20e79bd2501ef30b2de3089e8fad43e9
 
         PrepareBall();
 
@@ -576,7 +580,15 @@ yield return PassToMovingPlayer(
 
     private Vector3 GetBallPositionNear(Transform player)
     {
-        return player.position + player.forward * ballOffset + Vector3.up * ballHeight;
+        return player.position + player.forward * ballOffset * GetPlayerScale(player) + Vector3.up * ballHeight;
+    }
+
+    private float GetPlayerScale(Transform player)
+    {
+        if (player == null) return 1f;
+
+        Vector3 scale = player.lossyScale;
+        return Mathf.Max(0.01f, (Mathf.Abs(scale.x) + Mathf.Abs(scale.z)) * 0.5f);
     }
 
     private void SetPosition(Transform target, Vector3 position)
@@ -639,6 +651,7 @@ yield return PassToMovingPlayer(
         uiController.SetEventLog(eventLog);
         uiController.SetControlData(playerInControl, nextAction);
     }
+<<<<<<< HEAD
 
     private IEnumerator RunCommandMode(string commandName, KeyCode[] sequence, string player, string action, Action<CommandResult> onResult)
 {
@@ -687,3 +700,6 @@ private IEnumerator InterceptionRoutine(Transform interceptor, Animator intercep
     yield return new WaitForSeconds(1.2f);
 }
 }
+=======
+}
+>>>>>>> 41ef0efe20e79bd2501ef30b2de3089e8fad43e9
