@@ -42,6 +42,8 @@ public class PlayerMovement3D : MonoBehaviour
     [Header("Escenas")]
     [SerializeField] private bool persistAcrossScenes = true;
     [SerializeField] private string mainMenuSceneName = "Menu_Principal";
+    [SerializeField] private string footballSceneName = "minijuego1";
+    [SerializeField] private bool destroyInFootballScene = true;
 
     [Header("Camara")]
     [SerializeField] private bool keepCameraFollowingPlayer = true;
@@ -119,7 +121,8 @@ public class PlayerMovement3D : MonoBehaviour
 
     private void HandleSceneLoaded(Scene scene, LoadSceneMode mode)
     {
-        if (scene.name == mainMenuSceneName)
+        if (scene.name == mainMenuSceneName
+            || (destroyInFootballScene && scene.name == footballSceneName))
         {
             Destroy(gameObject);
             return;

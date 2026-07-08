@@ -29,6 +29,7 @@ public class FootballOSAnimationDemoAuto : MonoBehaviour
     [Header("Demo")]
     [SerializeField] private bool playOnStart = true;
     [SerializeField] private bool loopDemo = false;
+    [SerializeField] private float playerGroundY = 0.4f;
 
     private Transform midfielder;
     private Transform leftPlayer;
@@ -126,6 +127,7 @@ public class FootballOSAnimationDemoAuto : MonoBehaviour
 
         playerTransform = obj.transform;
         playerAnimator = obj.GetComponentInChildren<Animator>();
+        ConfigureAnimator(playerAnimator);
     }
 
     private void PrepareBall()
@@ -443,6 +445,7 @@ yield return PassToMovingPlayer(
     {
         if (player == null) yield break;
 
+        targetPosition = WithGroundY(targetPosition);
         LookAtFlat(player, targetPosition);
         SetSpeed(animator, speed);
 
@@ -477,6 +480,7 @@ yield return PassToMovingPlayer(
     {
         if (passer == null || receiver == null || ball == null) yield break;
 
+        receiverTargetPosition = WithGroundY(receiverTargetPosition);
         LookAtFlat(passer, receiverTargetPosition);
         LookAtFlat(receiver, passer.position);
 
@@ -520,6 +524,7 @@ yield return PassToMovingPlayer(
     {
         if (player == null) yield break;
 
+        targetPosition = WithGroundY(targetPosition);
         LookAtFlat(player, targetPosition);
         SetSpeed(animator, speed);
 
@@ -591,7 +596,7 @@ yield return PassToMovingPlayer(
 {
     if (target == null) return;
 
-    position.y = 0.4f;
+    position = WithGroundY(position);
     target.position = position;
 }
 
@@ -610,6 +615,7 @@ yield return PassToMovingPlayer(
     private void SetSpeed(Animator animator, float value)
     {
         if (animator == null) return;
+        if (!HasAnimatorParameter(animator, SpeedHash, AnimatorControllerParameterType.Float)) return;
 
         animator.SetFloat(SpeedHash, value);
     }
@@ -617,6 +623,7 @@ yield return PassToMovingPlayer(
     private void TriggerPass(Animator animator)
     {
         if (animator == null) return;
+        if (!HasAnimatorParameter(animator, PassHash, AnimatorControllerParameterType.Trigger)) return;
 
         animator.SetTrigger(PassHash);
     }
@@ -624,6 +631,7 @@ yield return PassToMovingPlayer(
     private void TriggerReceive(Animator animator)
     {
         if (animator == null) return;
+        if (!HasAnimatorParameter(animator, ReceiveHash, AnimatorControllerParameterType.Trigger)) return;
 
         animator.SetTrigger(ReceiveHash);
     }
@@ -631,8 +639,38 @@ yield return PassToMovingPlayer(
     private void TriggerTackle(Animator animator)
     {
         if (animator == null) return;
+        if (!HasAnimatorParameter(animator, TackleHash, AnimatorControllerParameterType.Trigger)) return;
 
         animator.SetTrigger(TackleHash);
+    }
+
+    private void ConfigureAnimator(Animator animator)
+    {
+        if (animator == null) return;
+
+        animator.applyRootMotion = false;
+        animator.cullingMode = AnimatorCullingMode.AlwaysAnimate;
+    }
+
+    private bool HasAnimatorParameter(Animator animator, int hash, AnimatorControllerParameterType type)
+    {
+        if (animator == null || animator.runtimeAnimatorController == null) return false;
+
+        foreach (AnimatorControllerParameter parameter in animator.parameters)
+        {
+            if (parameter.nameHash == hash && parameter.type == type)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private Vector3 WithGroundY(Vector3 position)
+    {
+        position.y = playerGroundY;
+        return position;
     }
 
     private float Smooth(float value)
@@ -685,7 +723,7 @@ private IEnumerator InterceptionRoutine(Transform interceptor, Animator intercep
         "Interception"
     );
 
-    Vector3 target = new Vector3(ball.position.x, 0f, ball.position.z);
+    Vector3 target = WithGroundY(new Vector3(ball.position.x, playerGroundY, ball.position.z));
 
     yield return MovePlayer(interceptor, interceptorAnimator, target, 0.7f, 0.85f);
 

@@ -35,6 +35,25 @@ public class FootballOSFullMatchController : MonoBehaviour
     [Header("Movimiento")]
     [SerializeField] private float supportMoveSpeed = 2.8f;
     [SerializeField] private float carrySpeed = 0.7f;
+    [SerializeField] private float playerGroundY = 0.4f;
+
+    [Header("Control equipo jugador")]
+    [SerializeField] private bool enableManualPlayerTeamControl = true;
+    [SerializeField] private string playerTeamRootName = "Team_Player";
+    [SerializeField] private int manualPlayerIndex = 6;
+    [SerializeField] private KeyCode switchManualPlayerKey = KeyCode.E;
+    [SerializeField] private float manualWalkSpeed = 5f;
+    [SerializeField] private float manualRunSpeed = 8f;
+    [SerializeField] private float manualTurnSpeed = 12f;
+    [SerializeField] private bool manualPlayerKeepsBall = true;
+    [SerializeField] private bool disablePlayerTeamAutoSupportWhileManual = true;
+
+    [Header("CPU / IA")]
+    [SerializeField] private float defensivePressureDistance = 2.2f;
+    [SerializeField] private float defensiveMarkingBlend = 0.45f;
+    [SerializeField] private float passLaneRiskPenalty = 5f;
+    [SerializeField] private float receiverMarkedPenalty = 3f;
+    [SerializeField] private float safePassBonusDistance = 2.4f;
 
     [Header("Partido")]
     [SerializeField] private bool loopMatch = true;
@@ -101,13 +120,22 @@ public class FootballOSFullMatchController : MonoBehaviour
         StartCoroutine(StartMatchWhenReady());
     }
 
-    private void Update()
+private void Update()
 {
     DisableManualPlayer();
 
     if (!ready) return;
 
-    UpdateSupportMovement(playerTeam, playerAnimators, playerBusy, playerBase, true);
+    if (enableManualPlayerTeamControl)
+    {
+        HandleManualPlayerTeamControl();
+    }
+
+    if (!enableManualPlayerTeamControl || !disablePlayerTeamAutoSupportWhileManual)
+    {
+        UpdateSupportMovement(playerTeam, playerAnimators, playerBusy, playerBase, true);
+    }
+
     UpdateSupportMovement(rivalTeam, rivalAnimators, rivalBusy, rivalBase, false);
 }
 
@@ -134,7 +162,16 @@ public class FootballOSFullMatchController : MonoBehaviour
 
         ready = true;
 
-        StartCoroutine(MatchLoop());
+        SetupKickOff();
+
+        if (!enableManualPlayerTeamControl)
+        {
+            StartCoroutine(MatchLoop());
+        }
+        else
+        {
+            SelectManualPlayer(manualPlayerIndex);
+        }
     }
 
     private bool FindEverything()
@@ -170,12 +207,57 @@ public class FootballOSFullMatchController : MonoBehaviour
     {
         if (player != null) return;
 
-        GameObject obj = GameObject.Find(objectName);
+        GameObject obj = FindPlayerTeamObject(objectName);
 
         if (obj == null) return;
 
         player = obj.transform;
         animator = obj.GetComponentInChildren<Animator>();
+        ConfigureAnimator(animator);
+
+        if (objectName.StartsWith("P_"))
+        {
+            DisablePlayerMovementBlockers(obj);
+        }
+    }
+
+    private GameObject FindPlayerTeamObject(string objectName)
+    {
+        GameObject root = GameObject.Find(playerTeamRootName);
+
+        if (root != null)
+        {
+            Transform[] children = root.GetComponentsInChildren<Transform>(true);
+
+            foreach (Transform child in children)
+            {
+                if (child.name == objectName)
+                {
+                    return child.gameObject;
+                }
+            }
+        }
+
+        return GameObject.Find(objectName);
+    }
+
+    private void DisablePlayerMovementBlockers(GameObject playerObject)
+    {
+        if (playerObject == null) return;
+
+        PlayerMovement3D playerMovement = playerObject.GetComponent<PlayerMovement3D>();
+
+        if (playerMovement != null)
+        {
+            playerMovement.enabled = false;
+        }
+
+        GoalkeeperController goalkeeperController = playerObject.GetComponent<GoalkeeperController>();
+
+        if (goalkeeperController != null)
+        {
+            goalkeeperController.enabled = false;
+        }
     }
 
     private void DisableManualPlayer()
@@ -559,6 +641,7 @@ public class FootballOSFullMatchController : MonoBehaviour
         Animator animator = GetAnimator(team, index);
         bool[] busy = GetBusyArray(team);
 
+        target = WithGroundY(target);
         busy[index] = true;
 
         LookAtFlat(player, target);
@@ -599,6 +682,7 @@ public class FootballOSFullMatchController : MonoBehaviour
         bool[] fromBusy = GetBusyArray(fromTeam);
         bool[] toBusy = GetBusyArray(toTeam);
 
+        receiverTarget = WithGroundY(receiverTarget);
         fromBusy[fromIndex] = true;
         toBusy[toIndex] = true;
 
@@ -780,7 +864,7 @@ public class FootballOSFullMatchController : MonoBehaviour
             "Interception"
         );
 
-        Vector3 target = new Vector3(ball.position.x, 0f, ball.position.z);
+        Vector3 target = WithGroundY(new Vector3(ball.position.x, playerGroundY, ball.position.z));
 
         yield return MovePlayerTo(team, index, target, 0.65f, 0.9f);
 
@@ -801,6 +885,7 @@ public class FootballOSFullMatchController : MonoBehaviour
         Transform player = GetPlayer(team, index);
         Animator animator = GetAnimator(team, index);
 
+        target = WithGroundY(target);
         LookAtFlat(player, target);
         SetSpeed(animator, speed);
 
@@ -844,6 +929,99 @@ public class FootballOSFullMatchController : MonoBehaviour
         ball.position = end;
     }
 
+    private void HandleManualPlayerTeamControl()
+    {
+        HandleManualPlayerSelectionInput();
+
+        manualPlayerIndex = Mathf.Clamp(manualPlayerIndex, 0, playerTeam.Length - 1);
+        Transform player = playerTeam[manualPlayerIndex];
+
+        if (player == null) return;
+
+        playerPossession = true;
+        ownerIndex = manualPlayerIndex;
+        playerBusy[manualPlayerIndex] = true;
+
+        Vector2 input = GetManualMoveInput();
+        bool isMoving = input.sqrMagnitude > 0.01f;
+        bool isRunning = Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
+
+        if (isMoving)
+        {
+            Vector3 direction = new Vector3(input.x, 0f, input.y).normalized;
+            Quaternion targetRotation = Quaternion.LookRotation(direction);
+            player.rotation = Quaternion.Slerp(player.rotation, targetRotation, manualTurnSpeed * Time.deltaTime);
+
+            float speed = isRunning ? manualRunSpeed : manualWalkSpeed;
+            player.position = ClampToField(player.position + direction * speed * Time.deltaTime);
+            SetSpeed(playerAnimators[manualPlayerIndex], isRunning ? 1f : 0.55f);
+        }
+        else
+        {
+            SetSpeed(playerAnimators[manualPlayerIndex], 0f);
+        }
+
+        if (manualPlayerKeepsBall)
+        {
+            AttachBall(player);
+        }
+    }
+
+    private void HandleManualPlayerSelectionInput()
+    {
+        if (Input.GetKeyDown(KeyCode.Alpha1)) SelectManualPlayer(0);
+        if (Input.GetKeyDown(KeyCode.Alpha2)) SelectManualPlayer(1);
+        if (Input.GetKeyDown(KeyCode.Alpha3)) SelectManualPlayer(2);
+        if (Input.GetKeyDown(KeyCode.Alpha4)) SelectManualPlayer(3);
+        if (Input.GetKeyDown(KeyCode.Alpha5)) SelectManualPlayer(4);
+        if (Input.GetKeyDown(KeyCode.Alpha6)) SelectManualPlayer(5);
+        if (Input.GetKeyDown(KeyCode.Alpha7)) SelectManualPlayer(6);
+        if (Input.GetKeyDown(KeyCode.Alpha8)) SelectManualPlayer(7);
+        if (Input.GetKeyDown(KeyCode.Alpha9)) SelectManualPlayer(8);
+        if (Input.GetKeyDown(KeyCode.Alpha0)) SelectManualPlayer(9);
+
+        if (Input.GetKeyDown(switchManualPlayerKey) || Input.GetKeyDown(KeyCode.Tab))
+        {
+            SelectManualPlayer((manualPlayerIndex + 1) % playerTeam.Length);
+        }
+    }
+
+    private Vector2 GetManualMoveInput()
+    {
+        float horizontal = 0f;
+        float vertical = 0f;
+
+        if (Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.LeftArrow)) horizontal -= 1f;
+        if (Input.GetKey(KeyCode.D) || Input.GetKey(KeyCode.RightArrow)) horizontal += 1f;
+        if (Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.UpArrow)) vertical += 1f;
+        if (Input.GetKey(KeyCode.S) || Input.GetKey(KeyCode.DownArrow)) vertical -= 1f;
+
+        return Vector2.ClampMagnitude(new Vector2(horizontal, vertical), 1f);
+    }
+
+    private void SelectManualPlayer(int index)
+    {
+        manualPlayerIndex = Mathf.Clamp(index, 0, playerTeam.Length - 1);
+        ownerIndex = manualPlayerIndex;
+        playerPossession = true;
+
+        for (int i = 0; i < playerBusy.Length; i++)
+        {
+            playerBusy[i] = i == manualPlayerIndex;
+        }
+
+        if (manualPlayerKeepsBall && playerTeam[manualPlayerIndex] != null)
+        {
+            AttachBall(playerTeam[manualPlayerIndex]);
+        }
+
+        UpdateUI(
+            "- Control manual activo\n- WASD/Flechas mueven, E cambia jugador",
+            GetName(Team.Player, manualPlayerIndex),
+            "Manual Control"
+        );
+    }
+
     private void UpdateSupportMovement(Transform[] team, Animator[] animators, bool[] busy, Vector3[] basePositions, bool isPlayerTeam)
     {
         if (ball == null) return;
@@ -852,6 +1030,7 @@ public class FootballOSFullMatchController : MonoBehaviour
         {
             if (team[i] == null) continue;
             if (busy[i]) continue;
+            if (enableManualPlayerTeamControl && isPlayerTeam && i == manualPlayerIndex) continue;
 
             bool isOwner = isPlayerTeam == playerPossession && i == ownerIndex;
 
@@ -885,7 +1064,29 @@ public class FootballOSFullMatchController : MonoBehaviour
     if (index == 0)
     {
         float goalkeeperX = Mathf.Clamp(ball.position.x, centerX - 3.5f, centerX + 3.5f);
-        return new Vector3(goalkeeperX, 0.4f, basePosition.z);
+        return new Vector3(goalkeeperX, playerGroundY, basePosition.z);
+    }
+
+    if (!teamHasBall)
+    {
+        if (IsOneOfClosestToBall(isPlayerTeam, index, 2))
+        {
+            Vector3 pressureTarget = Vector3.MoveTowards(
+                WithGroundY(ball.position),
+                basePosition,
+                defensivePressureDistance
+            );
+
+            return ClampToField(pressureTarget);
+        }
+
+        Transform mark = FindClosestOpponentForMarking(basePosition, isPlayerTeam);
+
+        if (mark != null)
+        {
+            Vector3 markingTarget = Vector3.Lerp(basePosition, WithGroundY(mark.position), defensiveMarkingBlend);
+            return ClampToField(markingTarget);
+        }
     }
 
     float attackDirection = isPlayerTeam ? 1f : -1f;
@@ -899,7 +1100,7 @@ public class FootballOSFullMatchController : MonoBehaviour
     {
         target = new Vector3(
             basePosition.x + xInfluence,
-            0.4f,
+            playerGroundY,
             basePosition.z + zInfluence + attackDirection * 0.8f
         );
     }
@@ -907,15 +1108,12 @@ public class FootballOSFullMatchController : MonoBehaviour
     {
         target = new Vector3(
             basePosition.x + xInfluence,
-            0.4f,
+            playerGroundY,
             basePosition.z + zInfluence
         );
     }
 
-    target.x = Mathf.Clamp(target.x, centerX - 10f, centerX + 10f);
-    target.z = Mathf.Clamp(target.z, playerGoalZ + 2f, rivalGoalZ - 2f);
-
-    return target;
+    return ClampToField(target);
 }
 
     private Transform FindClosestOpponentForMarking(Vector3 basePosition, bool isPlayerTeam)
@@ -940,6 +1138,109 @@ public class FootballOSFullMatchController : MonoBehaviour
 
     return closest;
 }
+
+    private bool IsOneOfClosestToBall(bool isPlayerTeam, int index, int count)
+{
+    if (ball == null) return false;
+
+    Transform[] team = isPlayerTeam ? playerTeam : rivalTeam;
+    float candidateDistance = GetFlatDistance(team[index].position, ball.position);
+    int closerPlayers = 0;
+
+    for (int i = 1; i < team.Length; i++)
+    {
+        if (i == index || team[i] == null) continue;
+
+        if (GetFlatDistance(team[i].position, ball.position) < candidateDistance)
+        {
+            closerPlayers++;
+        }
+    }
+
+    return closerPlayers < count;
+}
+
+private Transform GetNearestOpponent(Team team, Vector3 position)
+{
+    Transform[] opponents = team == Team.Player ? rivalTeam : playerTeam;
+    Transform closest = null;
+    float bestDistance = 9999f;
+
+    for (int i = 1; i < opponents.Length; i++)
+    {
+        if (opponents[i] == null) continue;
+
+        float distance = GetFlatDistance(position, opponents[i].position);
+
+        if (distance < bestDistance)
+        {
+            bestDistance = distance;
+            closest = opponents[i];
+        }
+    }
+
+    return closest;
+}
+
+private float GetNearestOpponentDistance(Team team, Vector3 position)
+{
+    Transform nearest = GetNearestOpponent(team, position);
+
+    if (nearest == null) return 9999f;
+
+    return GetFlatDistance(position, nearest.position);
+}
+
+private float GetPassLaneRisk(Team team, Vector3 from, Vector3 to)
+{
+    Transform[] opponents = team == Team.Player ? rivalTeam : playerTeam;
+    float risk = 0f;
+
+    for (int i = 1; i < opponents.Length; i++)
+    {
+        if (opponents[i] == null) continue;
+
+        float distanceToLane = DistancePointToSegmentFlat(opponents[i].position, from, to);
+
+        if (distanceToLane < 1.6f)
+        {
+            risk += 1f - distanceToLane / 1.6f;
+        }
+    }
+
+    return Mathf.Clamp01(risk);
+}
+
+private float DistancePointToSegmentFlat(Vector3 point, Vector3 segmentStart, Vector3 segmentEnd)
+{
+    Vector2 p = new Vector2(point.x, point.z);
+    Vector2 a = new Vector2(segmentStart.x, segmentStart.z);
+    Vector2 b = new Vector2(segmentEnd.x, segmentEnd.z);
+    Vector2 ab = b - a;
+
+    if (ab.sqrMagnitude < 0.0001f)
+    {
+        return Vector2.Distance(p, a);
+    }
+
+    float t = Mathf.Clamp01(Vector2.Dot(p - a, ab) / ab.sqrMagnitude);
+    return Vector2.Distance(p, a + ab * t);
+}
+
+private float GetFlatDistance(Vector3 a, Vector3 b)
+{
+    a.y = 0f;
+    b.y = 0f;
+    return Vector3.Distance(a, b);
+}
+
+private Vector3 ClampToField(Vector3 target)
+{
+    target.x = Mathf.Clamp(target.x, centerX - 10f, centerX + 10f);
+    target.z = Mathf.Clamp(target.z, playerGoalZ + 2f, rivalGoalZ - 2f);
+    return WithGroundY(target);
+}
+
     private void AttachBall(Transform owner)
     {
         if (owner == null || ball == null) return;
@@ -988,6 +1289,7 @@ public class FootballOSFullMatchController : MonoBehaviour
     private void SetSpeed(Animator animator, float value)
     {
         if (animator == null) return;
+        if (!HasAnimatorParameter(animator, SpeedHash, AnimatorControllerParameterType.Float)) return;
 
         animator.SetFloat(SpeedHash, value);
     }
@@ -995,8 +1297,38 @@ public class FootballOSFullMatchController : MonoBehaviour
     private void Trigger(Animator animator, int hash)
     {
         if (animator == null) return;
+        if (!HasAnimatorParameter(animator, hash, AnimatorControllerParameterType.Trigger)) return;
 
         animator.SetTrigger(hash);
+    }
+
+    private void ConfigureAnimator(Animator animator)
+    {
+        if (animator == null) return;
+
+        animator.applyRootMotion = false;
+        animator.cullingMode = AnimatorCullingMode.AlwaysAnimate;
+    }
+
+    private bool HasAnimatorParameter(Animator animator, int hash, AnimatorControllerParameterType type)
+    {
+        if (animator == null || animator.runtimeAnimatorController == null) return false;
+
+        foreach (AnimatorControllerParameter parameter in animator.parameters)
+        {
+            if (parameter.nameHash == hash && parameter.type == type)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private Vector3 WithGroundY(Vector3 position)
+    {
+        position.y = playerGroundY;
+        return position;
     }
 
     private float Smooth(float value)
@@ -1159,6 +1491,10 @@ private int ChooseBestReceiver(Team team, int currentOwner)
         float forwardProgress = (candidate.position.z - owner.position.z) * attackDirection;
 
         float widthBonus = Mathf.Abs(candidate.position.x - centerX) * 0.25f;
+        float nearestOpponentDistance = GetNearestOpponentDistance(team, candidate.position);
+        float safeDistance = Mathf.Max(0.01f, safePassBonusDistance);
+        float markingRisk = Mathf.Clamp01((safeDistance - nearestOpponentDistance) / safeDistance);
+        float laneRisk = GetPassLaneRisk(team, owner.position, candidate.position);
 
         float roleBonus = 0f;
 
@@ -1174,8 +1510,11 @@ private int ChooseBestReceiver(Team team, int currentOwner)
             forwardProgress * 2.2f +
             widthBonus +
             roleBonus +
-            randomness -
-            distance * 0.15f;
+            randomness +
+            nearestOpponentDistance * 0.25f -
+            distance * 0.15f -
+            markingRisk * receiverMarkedPenalty -
+            laneRisk * passLaneRiskPenalty;
 
         if (forwardProgress < -2f)
         {
@@ -1208,14 +1547,14 @@ private Vector3 GetDynamicReceiverTarget(Team team, int index)
 
     Vector3 target = new Vector3(
         basePosition.x + randomX,
-        0f,
+        playerGroundY,
         basePosition.z + randomZ
     );
 
     target.x = Mathf.Clamp(target.x, centerX - 10f, centerX + 10f);
     target.z = Mathf.Clamp(target.z, playerGoalZ + 2f, rivalGoalZ - 2f);
 
-    return target;
+    return WithGroundY(target);
 }
 
 private Vector3 GetCarryTarget(Team team, int index)
@@ -1232,10 +1571,22 @@ private Vector3 GetCarryTarget(Team team, int index)
         Random.Range(1.0f, 2.8f) * attackDirection
     );
 
-    target.x = Mathf.Clamp(target.x, centerX - 10f, centerX + 10f);
-    target.z = Mathf.Clamp(target.z, playerGoalZ + 2f, rivalGoalZ - 2f);
+    Transform nearestOpponent = GetNearestOpponent(team, player.position);
 
-    return target;
+    if (nearestOpponent != null)
+    {
+        Vector3 away = player.position - nearestOpponent.position;
+        away.y = 0f;
+
+        if (away.sqrMagnitude > 0.001f)
+        {
+            float pressureDistance = Vector3.Distance(player.position, nearestOpponent.position);
+            float evadeWeight = Mathf.Clamp01((4.5f - pressureDistance) / 4.5f);
+            target += away.normalized * evadeWeight * 2f;
+        }
+    }
+
+    return ClampToField(target);
 }
 
 private bool CanShoot(Team team, int index)
