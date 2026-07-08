@@ -10,20 +10,20 @@ public class CopaRotator : MonoBehaviour
     [SerializeField] private float degreesPerSecond = 12f;
     [SerializeField] private Vector3 fixedLocalPosition = new Vector3(2.04f, -0.7f, 3.57f);
     [SerializeField] private Vector3 fixedLocalScale = new Vector3(400f, 400f, 450f);
-    [SerializeField] private bool forceExactLocalPosition = true;
-    [SerializeField] private bool forceExactLocalScale = true;
+    [SerializeField] private bool forceExactLocalPosition;
+    [SerializeField] private bool forceExactLocalScale;
     [SerializeField] private bool rotateOnlyOnY = true;
     [SerializeField] private Vector3 fixedRootEulerAngles = Vector3.zero;
-    [SerializeField] private bool forceRootRotation = true;
+    [SerializeField] private bool forceRootRotation;
     [SerializeField] private bool rotateVisualModel = true;
-    [SerializeField] private bool centerVisualChildren = true;
+    [SerializeField] private bool centerVisualChildren;
 
     [Header("Placement")]
     [SerializeField] private bool keepOnGround;
     [SerializeField] private float groundY;
 
     [Header("Menu Camera")]
-    [SerializeField] private bool frameMainCamera = true;
+    [SerializeField] private bool frameMainCamera;
     [SerializeField] private Vector3 menuCameraPosition = new Vector3(0f, 500f, -900f);
     [SerializeField] private Vector3 menuCameraEulerAngles = Vector3.zero;
     [SerializeField] private float menuCameraFarClip = 3000f;

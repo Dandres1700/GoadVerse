@@ -663,18 +663,18 @@ MonoBehaviour:
   target: {fileID: 0}
   targetName: Copa mundial (1)
   degreesPerSecond: 12
-  fixedLocalPosition: {x: 0.34, y: 1.31, z: 0}
+  fixedLocalPosition: {x: -105, y: 88, z: 316}
   fixedLocalScale: {x: 350, y: 350, z: 350}
-  forceExactLocalPosition: 1
-  forceExactLocalScale: 1
+  forceExactLocalPosition: 0
+  forceExactLocalScale: 0
   rotateOnlyOnY: 1
   fixedRootEulerAngles: {x: 0, y: 0, z: 0}
-  forceRootRotation: 1
+  forceRootRotation: 0
   rotateVisualModel: 1
-  centerVisualChildren: 1
+  centerVisualChildren: 0
   keepOnGround: 0
   groundY: 0
-  frameMainCamera: 1
+  frameMainCamera: 0
   menuCameraPosition: {x: 0, y: 500, z: -900}
   menuCameraEulerAngles: {x: 0, y: 0, z: 0}
   menuCameraFarClip: 3000
