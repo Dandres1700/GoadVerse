@@ -38,6 +38,10 @@ public class FootballOSFullMatchController : MonoBehaviour
 
     [Header("Partido")]
     [SerializeField] private bool loopMatch = true;
+    [SerializeField] private int actionsPerPossession = 8;
+[SerializeField] private int commandEveryActions = 3;
+[SerializeField] private float minPassDistance = 3f;
+[SerializeField] private float maxPassDistance = 13f;
 
     private string[] playerNames =
     {
@@ -245,51 +249,49 @@ public class FootballOSFullMatchController : MonoBehaviour
 }
 
     private void PrepareBall()
-    {
-        if (ballRb != null)
-        {
-            ballRb.isKinematic = true;
-            ballRb.useGravity = false;
-            ballRb.linearVelocity = Vector3.zero;
-            ballRb.angularVelocity = Vector3.zero;
-        }
-    }
+{
+    if (ballRb == null) return;
+
+    ballRb.isKinematic = false;
+    ballRb.useGravity = false;
+    ballRb.linearVelocity = Vector3.zero;
+    ballRb.angularVelocity = Vector3.zero;
+
+    ballRb.isKinematic = true;
+}
 
     private IEnumerator MatchLoop()
+{
+    SetupKickOff();
+
+    while (loopMatch)
     {
-        do
+        yield return PlayDynamicPossession(Team.Player, actionsPerPossession);
+
+        yield return new WaitForSeconds(0.4f);
+
+        yield return PlayDynamicPossession(Team.Rival, actionsPerPossession);
+
+        minute += 4;
+
+        if (minute >= 90)
         {
+            UpdateUI(
+                "- Partido finalizado\n- Simulación Football OS completada",
+                "FOOTBALL OS",
+                "Full Time"
+            );
+
+            yield return new WaitForSeconds(2f);
+
+            minute = 0;
+            ecuadorScore = 0;
+            cpuScore = 0;
+
             SetupKickOff();
-            yield return new WaitForSeconds(0.4f);
-
-            yield return EcuadorAttack();
-
-            yield return new WaitForSeconds(0.4f);
-
-            yield return CpuAttack();
-
-            minute += 6;
-
-            if (minute >= 90)
-            {
-                UpdateUI(
-                    "- Partido finalizado\n- Simulación Football OS completada",
-                    "FOOTBALL OS",
-                    "Full Time"
-                );
-
-                yield return new WaitForSeconds(2f);
-
-                if (!loopMatch)
-                    yield break;
-
-                minute = 0;
-                ecuadorScore = 0;
-                cpuScore = 0;
-            }
-
-        } while (loopMatch);
+        }
     }
+}
 
     private void SetupKickOff()
     {
@@ -841,24 +843,72 @@ public class FootballOSFullMatchController : MonoBehaviour
     }
 
     private Vector3 GetDynamicSupportPosition(Vector3 basePosition, bool isPlayerTeam, int index)
+{
+    if (ball == null) return basePosition;
+
+    bool teamHasBall = isPlayerTeam == playerPossession;
+
+    if (index == 0)
     {
-        if (index == 0)
-        {
-            float goalkeeperX = Mathf.Clamp(ball.position.x, centerX - 3f, centerX + 3f);
-            return new Vector3(goalkeeperX, 0f, basePosition.z);
-        }
-
-        float ballZInfluence = Mathf.Clamp(ball.position.z * 0.2f, -3f, 3f);
-        float ballXInfluence = Mathf.Clamp((ball.position.x - centerX) * 0.25f, -2f, 2f);
-
-        if (isPlayerTeam)
-        {
-            return new Vector3(basePosition.x + ballXInfluence, 0f, basePosition.z + ballZInfluence);
-        }
-
-        return new Vector3(basePosition.x + ballXInfluence, 0f, basePosition.z + ballZInfluence);
+        float goalkeeperX = Mathf.Clamp(ball.position.x, centerX - 4f, centerX + 4f);
+        return new Vector3(goalkeeperX, 0f, basePosition.z);
     }
 
+    float attackDirection = isPlayerTeam ? 1f : -1f;
+
+    if (!teamHasBall)
+    {
+        Transform markTarget = FindClosestOpponentForMarking(basePosition, isPlayerTeam);
+
+        if (markTarget != null)
+        {
+            Vector3 markPosition = Vector3.Lerp(basePosition, markTarget.position, 0.35f);
+            markPosition.y = 0f;
+            return markPosition;
+        }
+    }
+
+    float ballXInfluence = Mathf.Clamp((ball.position.x - centerX) * 0.35f, -3f, 3f);
+    float ballZInfluence = Mathf.Clamp((ball.position.z - basePosition.z) * 0.18f, -4f, 4f);
+
+    if (teamHasBall)
+    {
+        return new Vector3(
+            basePosition.x + ballXInfluence + Random.Range(-0.15f, 0.15f),
+            0f,
+            basePosition.z + ballZInfluence + attackDirection * 1.5f
+        );
+    }
+
+    return new Vector3(
+        basePosition.x + ballXInfluence,
+        0f,
+        basePosition.z + ballZInfluence
+    );
+}
+
+    private Transform FindClosestOpponentForMarking(Vector3 basePosition, bool isPlayerTeam)
+{
+    Transform[] opponents = isPlayerTeam ? rivalTeam : playerTeam;
+
+    Transform closest = null;
+    float bestDistance = 9999f;
+
+    for (int i = 1; i < opponents.Length; i++)
+    {
+        if (opponents[i] == null) continue;
+
+        float distance = Vector3.Distance(basePosition, opponents[i].position);
+
+        if (distance < bestDistance)
+        {
+            bestDistance = distance;
+            closest = opponents[i];
+        }
+    }
+
+    return closest;
+}
     private void AttachBall(Transform owner)
     {
         if (owner == null || ball == null) return;
@@ -935,4 +985,281 @@ public class FootballOSFullMatchController : MonoBehaviour
 
         uiController.SetControlData(playerInControl, action);
     }
+    private IEnumerator PlayDynamicPossession(Team team, int maxActions)
+{
+    playerPossession = team == Team.Player;
+
+    if (team == Team.Player)
+    {
+        UpdateUI(
+            "- Ecuador construye jugada\n- Football OS analiza opciones",
+            GetName(team, ownerIndex),
+            "Build Up"
+        );
+    }
+    else
+    {
+        UpdateUI(
+            "- CPU recupera posesión\n- Ecuador activa presión",
+            GetName(team, ownerIndex),
+            "CPU Build Up"
+        );
+    }
+
+    for (int action = 0; action < maxActions; action++)
+    {
+        Team opponentTeam = GetOpponent(team);
+
+        if (CanShoot(team, ownerIndex))
+        {
+            if (team == Team.Player)
+            {
+                yield return CommandShot();
+            }
+            else
+            {
+                yield return CpuShot();
+            }
+
+            yield break;
+        }
+
+        int receiverIndex = ChooseBestReceiver(team, ownerIndex);
+
+        if (receiverIndex == ownerIndex)
+        {
+            receiverIndex = GetRandomOutfieldPlayer();
+        }
+
+        Vector3 receiverTarget = GetDynamicReceiverTarget(team, receiverIndex);
+
+        bool importantAction = team == Team.Player && action % commandEveryActions == 0;
+
+        if (importantAction)
+        {
+            CommandGrade commandResult;
+
+            yield return RunCommandForDynamicPass(
+                "TACTICAL PASS",
+                new KeyCode[] { KeyCode.A, KeyCode.S, KeyCode.D },
+                GetName(team, ownerIndex),
+                "Pass"
+            );
+
+            commandResult = lastCommandResult;
+
+            if (commandResult == CommandGrade.Miss)
+            {
+                int interceptor = FindNearestPlayerToBall(opponentTeam);
+
+                yield return Interception(opponentTeam, interceptor);
+                yield break;
+            }
+
+            float passTime = GetPassTime(commandResult);
+
+            yield return PassBall(
+                team,
+                ownerIndex,
+                team,
+                receiverIndex,
+                receiverTarget,
+                passTime
+            );
+        }
+        else
+        {
+            yield return PassBall(
+                team,
+                ownerIndex,
+                team,
+                receiverIndex,
+                receiverTarget,
+                Random.Range(0.55f, 0.95f)
+            );
+        }
+
+        ownerIndex = receiverIndex;
+        playerPossession = team == Team.Player;
+
+        Vector3 carryTarget = GetCarryTarget(team, ownerIndex);
+
+        yield return CarryWithBall(
+            team,
+            ownerIndex,
+            carryTarget,
+            Random.Range(0.45f, 0.75f)
+        );
+
+        minute += 1;
+
+        yield return new WaitForSeconds(0.08f);
+    }
+}
+private Team GetOpponent(Team team)
+{
+    return team == Team.Player ? Team.Rival : Team.Player;
+}
+
+private int ChooseBestReceiver(Team team, int currentOwner)
+{
+    Transform owner = GetPlayer(team, currentOwner);
+
+    if (owner == null) return currentOwner;
+
+    float attackDirection = team == Team.Player ? 1f : -1f;
+
+    int bestIndex = currentOwner;
+    float bestScore = -9999f;
+
+    for (int i = 1; i < 11; i++)
+    {
+        if (i == currentOwner) continue;
+
+        Transform candidate = GetPlayer(team, i);
+
+        if (candidate == null) continue;
+
+        float distance = Vector3.Distance(owner.position, candidate.position);
+
+        if (distance < minPassDistance || distance > maxPassDistance)
+            continue;
+
+        float forwardProgress = (candidate.position.z - owner.position.z) * attackDirection;
+
+        float widthBonus = Mathf.Abs(candidate.position.x - centerX) * 0.25f;
+
+        float roleBonus = 0f;
+
+        if (i == 8 || i == 9 || i == 10)
+            roleBonus += 3f;
+
+        if (i == 5 || i == 6 || i == 7)
+            roleBonus += 1.5f;
+
+        float randomness = Random.Range(-2f, 3f);
+
+        float score =
+            forwardProgress * 2.2f +
+            widthBonus +
+            roleBonus +
+            randomness -
+            distance * 0.15f;
+
+        if (forwardProgress < -2f)
+        {
+            score -= 6f;
+        }
+
+        if (score > bestScore)
+        {
+            bestScore = score;
+            bestIndex = i;
+        }
+    }
+
+    if (bestIndex == currentOwner)
+    {
+        bestIndex = Random.Range(5, 11);
+    }
+
+    return bestIndex;
+}
+
+private Vector3 GetDynamicReceiverTarget(Team team, int index)
+{
+    Vector3 basePosition = team == Team.Player ? playerBase[index] : rivalBase[index];
+
+    float attackDirection = team == Team.Player ? 1f : -1f;
+
+    float randomX = Random.Range(-2.0f, 2.0f);
+    float randomZ = Random.Range(1.5f, 4.0f) * attackDirection;
+
+    Vector3 target = new Vector3(
+        basePosition.x + randomX,
+        0f,
+        basePosition.z + randomZ
+    );
+
+    target.x = Mathf.Clamp(target.x, centerX - 10f, centerX + 10f);
+    target.z = Mathf.Clamp(target.z, playerGoalZ + 2f, rivalGoalZ - 2f);
+
+    return target;
+}
+
+private Vector3 GetCarryTarget(Team team, int index)
+{
+    Transform player = GetPlayer(team, index);
+
+    if (player == null) return Vector3.zero;
+
+    float attackDirection = team == Team.Player ? 1f : -1f;
+
+    Vector3 target = player.position + new Vector3(
+        Random.Range(-1.2f, 1.2f),
+        0f,
+        Random.Range(1.0f, 2.8f) * attackDirection
+    );
+
+    target.x = Mathf.Clamp(target.x, centerX - 10f, centerX + 10f);
+    target.z = Mathf.Clamp(target.z, playerGoalZ + 2f, rivalGoalZ - 2f);
+
+    return target;
+}
+
+private bool CanShoot(Team team, int index)
+{
+    Transform player = GetPlayer(team, index);
+
+    if (player == null) return false;
+
+    if (team == Team.Player)
+    {
+        return player.position.z > rivalGoalZ - 7f && (index == 8 || index == 9 || index == 10);
+    }
+
+    return player.position.z < playerGoalZ + 7f && (index == 8 || index == 9 || index == 10);
+}
+
+private int GetRandomOutfieldPlayer()
+{
+    return Random.Range(1, 11);
+}
+
+private float GetPassTime(CommandGrade grade)
+{
+    if (grade == CommandGrade.Perfect) return 0.5f;
+    if (grade == CommandGrade.Good) return 0.7f;
+    if (grade == CommandGrade.Bad) return 1.0f;
+
+    return 1.2f;
+}
+
+private int FindNearestPlayerToBall(Team team)
+{
+    int bestIndex = 1;
+    float bestDistance = 9999f;
+
+    for (int i = 1; i < 11; i++)
+    {
+        Transform player = GetPlayer(team, i);
+
+        if (player == null) continue;
+
+        float distance = Vector3.Distance(player.position, ball.position);
+
+        if (distance < bestDistance)
+        {
+            bestDistance = distance;
+            bestIndex = i;
+        }
+    }
+
+    return bestIndex;
+}
+
+private IEnumerator RunCommandForDynamicPass(string commandName, KeyCode[] sequence, string player, string action)
+{
+    yield return RunCommand(commandName, sequence, player, action);
+}
 }
