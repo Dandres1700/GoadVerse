@@ -15,10 +15,15 @@ public class FootballOSAnimationDemoAuto : MonoBehaviour
     [SerializeField] private bool playDemoOnStart = true;
     [SerializeField] private bool loopDemo = false;
 
-    [Header("Fuerza del balón")]
-    [SerializeField] private float passForce = 6f;
-    [SerializeField] private float shootForce = 14f;
-    [SerializeField] private float liftForce = 2f;
+    [Header("Posicion del balon")]
+    [SerializeField] private float ballForwardOffset = 1.1f;
+    [SerializeField] private float ballHeight = 0.35f;
+
+    [Header("Fuerza del balon")]
+    [SerializeField] private float passForce = 3.5f;
+    [SerializeField] private float shootForce = 8f;
+    [SerializeField] private float passLiftForce = 0.2f;
+    [SerializeField] private float shootLiftForce = 0.8f;
 
     private Animator playerAnimator;
     private Transform playerTransform;
@@ -55,7 +60,9 @@ public class FootballOSAnimationDemoAuto : MonoBehaviour
             yield return null;
         }
 
-        Debug.Log("FOOTBALL OS: Jugador y balón encontrados");
+        Debug.Log("FOOTBALL OS: Jugador y balon encontrados");
+
+        PrepareBallInFrontOfPlayer();
 
         if (playDemoOnStart)
         {
@@ -68,23 +75,29 @@ public class FootballOSAnimationDemoAuto : MonoBehaviour
         do
         {
             Debug.Log("FOOTBALL OS: Esperando primera jugada...");
+            PrepareBallInFrontOfPlayer();
             yield return new WaitForSeconds(2f);
 
             Debug.Log("FOOTBALL OS: Receive");
+            PrepareBallInFrontOfPlayer();
             playerAnimator.SetTrigger("Receive");
             yield return new WaitForSeconds(2f);
 
             Debug.Log("FOOTBALL OS: Pass");
+            PrepareBallInFrontOfPlayer();
             playerAnimator.SetTrigger("Pass");
+
             yield return new WaitForSeconds(0.6f);
-            KickBall(passForce, 0.4f);
+            KickBall(passForce, passLiftForce);
 
             yield return new WaitForSeconds(2f);
 
             Debug.Log("FOOTBALL OS: Shoot");
+            PrepareBallInFrontOfPlayer();
             playerAnimator.SetTrigger("Shoot");
+
             yield return new WaitForSeconds(0.7f);
-            KickBall(shootForce, liftForce);
+            KickBall(shootForce, shootLiftForce);
 
             yield return new WaitForSeconds(2f);
 
@@ -94,6 +107,21 @@ public class FootballOSAnimationDemoAuto : MonoBehaviour
             yield return new WaitForSeconds(3f);
 
         } while (loopDemo);
+    }
+
+    private void PrepareBallInFrontOfPlayer()
+    {
+        if (ballRb == null || playerTransform == null) return;
+
+        ballRb.linearVelocity = Vector3.zero;
+        ballRb.angularVelocity = Vector3.zero;
+
+        Vector3 ballPosition = playerTransform.position
+                               + playerTransform.forward * ballForwardOffset
+                               + Vector3.up * ballHeight;
+
+        ballRb.position = ballPosition;
+        ballRb.rotation = Quaternion.identity;
     }
 
     private void KickBall(float force, float lift)
@@ -108,6 +136,6 @@ public class FootballOSAnimationDemoAuto : MonoBehaviour
 
         ballRb.AddForce(direction.normalized * force, ForceMode.Impulse);
 
-        Debug.Log("FOOTBALL OS: Balón impulsado");
+        Debug.Log("FOOTBALL OS: Balon impulsado");
     }
 }

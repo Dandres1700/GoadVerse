@@ -594,8 +594,15 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::FootballOSAnimationDemoAuto
   canchaSceneName: minijuego1
   playerObjectName: HumanM_Model
+  ballObjectName: Ball
   playDemoOnStart: 1
   loopDemo: 0
+  ballForwardOffset: 1.1
+  ballHeight: 0.35
+  passForce: 3.5
+  shootForce: 8
+  passLiftForce: 0.2
+  shootLiftForce: 0.8
 --- !u!4 &1779460904
 Transform:
   m_ObjectHideFlags: 0
@@ -655,9 +662,9 @@ Rigidbody:
   m_ImplicitTensor: 1
   m_UseGravity: 1
   m_IsKinematic: 0
-  m_Interpolate: 0
+  m_Interpolate: 1
   m_Constraints: 0
-  m_CollisionDetection: 0
+  m_CollisionDetection: 2
 --- !u!135 &1865814586
 SphereCollider:
   m_ObjectHideFlags: 0
