@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -54,6 +55,8 @@ public class FootballOSAnimationDemoAuto : MonoBehaviour
 
     private FootballOSUIController uiController;
 
+    private FootballOSCommandSystem commandSystem;
+
     private static readonly int SpeedHash = Animator.StringToHash("Speed");
     private static readonly int PassHash = Animator.StringToHash("Pass");
     private static readonly int ReceiveHash = Animator.StringToHash("Receive");
@@ -75,6 +78,7 @@ public class FootballOSAnimationDemoAuto : MonoBehaviour
         }
 
         uiController = FindAnyObjectByType<FootballOSUIController>();
+        commandSystem = FindAnyObjectByType<FootballOSCommandSystem>();
 
         PrepareBall();
 
@@ -163,16 +167,31 @@ public class FootballOSAnimationDemoAuto : MonoBehaviour
             );
 
             // Midfielder -> Left
-            yield return PassToMovingPlayer(
-                midfielder,
-                midfielderAnim,
-                leftPlayer,
-                leftAnim,
-                new Vector3(-7.4f, 0f, 7.3f),
-                0.8f,
-                0.2f
-            );
+            CommandResult passLeftResult = CommandResult.Miss;
 
+yield return RunCommandMode(
+    "PASS LEFT CHANNEL",
+    new KeyCode[] { KeyCode.A, KeyCode.S, KeyCode.D },
+    "Player_Midfielder",
+    "Pass Left",
+    r => passLeftResult = r
+);
+
+if (passLeftResult == CommandResult.Miss)
+{
+    yield return InterceptionRoutine(defender2, defender2Anim, "Secuencia fallida");
+    continue;
+}
+
+yield return PassToMovingPlayer(
+    midfielder,
+    midfielderAnim,
+    leftPlayer,
+    leftAnim,
+    new Vector3(-7.4f, 0f, 7.3f),
+    GetPassTimeByResult(passLeftResult),
+    0.2f
+);
             // Left conduce
             UpdateOSUI(
                 "- Control exitoso\n- Avance por banda izquierda",
@@ -192,15 +211,31 @@ public class FootballOSAnimationDemoAuto : MonoBehaviour
             StartCoroutine(MovePlayer(defender1, defender1Anim, new Vector3(-4.1f, 0f, 6.5f), 1.0f, 0.85f));
             TriggerTackle(defender1Anim);
 
-            yield return PassToMovingPlayer(
-                leftPlayer,
-                leftAnim,
-                forward,
-                forwardAnim,
-                new Vector3(-4.2f, 0f, 9.1f),
-                0.75f,
-                0.15f
-            );
+            CommandResult passForwardResult = CommandResult.Miss;
+
+yield return RunCommandMode(
+    "INTERIOR PASS",
+    new KeyCode[] { KeyCode.W, KeyCode.D, KeyCode.Space },
+    "Player_Left",
+    "Pass Forward",
+    r => passForwardResult = r
+);
+
+if (passForwardResult == CommandResult.Miss)
+{
+    yield return InterceptionRoutine(defender1, defender1Anim, "Pase interior perdido");
+    continue;
+}
+
+yield return PassToMovingPlayer(
+    leftPlayer,
+    leftAnim,
+    forward,
+    forwardAnim,
+    new Vector3(-4.2f, 0f, 9.1f),
+    GetPassTimeByResult(passForwardResult),
+    0.15f
+);
 
             // Forward controla y avanza
             UpdateOSUI(
@@ -218,15 +253,31 @@ public class FootballOSAnimationDemoAuto : MonoBehaviour
             );
 
             // Forward -> Right
-            yield return PassToMovingPlayer(
-                forward,
-                forwardAnim,
-                rightPlayer,
-                rightAnim,
-                new Vector3(-0.6f, 0f, 9.4f),
-                0.8f,
-                0.15f
-            );
+            CommandResult passRightResult = CommandResult.Miss;
+
+yield return RunCommandMode(
+    "SWITCH TO RIGHT",
+    new KeyCode[] { KeyCode.D, KeyCode.A, KeyCode.Space },
+    "Player_Forward",
+    "Pass Right",
+    r => passRightResult = r
+);
+
+if (passRightResult == CommandResult.Miss)
+{
+    yield return InterceptionRoutine(defender3, defender3Anim, "Cambio de orientación fallido");
+    continue;
+}
+
+yield return PassToMovingPlayer(
+    forward,
+    forwardAnim,
+    rightPlayer,
+    rightAnim,
+    new Vector3(-0.6f, 0f, 9.4f),
+    GetPassTimeByResult(passRightResult),
+    0.15f
+);
 
             // Right conduce
             UpdateOSUI(
@@ -537,11 +588,12 @@ public class FootballOSAnimationDemoAuto : MonoBehaviour
     }
 
     private void SetPosition(Transform target, Vector3 position)
-    {
-        if (target == null) return;
+{
+    if (target == null) return;
 
-        target.position = position;
-    }
+    position.y = 0.4f;
+    target.position = position;
+}
 
     private void LookAtFlat(Transform who, Vector3 target)
     {
@@ -596,4 +648,50 @@ public class FootballOSAnimationDemoAuto : MonoBehaviour
         uiController.SetEventLog(eventLog);
         uiController.SetControlData(playerInControl, nextAction);
     }
+    private IEnumerator RunCommandMode(string commandName, KeyCode[] sequence, string player, string action, Action<CommandResult> onResult)
+{
+    UpdateOSUI(
+        "- COMMAND MODE ACTIVADO\n- Ejecuta la secuencia del software",
+        player,
+        action
+    );
+
+    CommandResult result = CommandResult.Miss;
+
+    if (commandSystem != null)
+    {
+        yield return commandSystem.RunCommand(commandName, sequence, r => result = r);
+    }
+
+    onResult?.Invoke(result);
+}
+
+private float GetPassTimeByResult(CommandResult result)
+{
+    if (result == CommandResult.Perfect) return 0.55f;
+    if (result == CommandResult.Good) return 0.75f;
+    if (result == CommandResult.Bad) return 1.05f;
+
+    return 1.2f;
+}
+
+private IEnumerator InterceptionRoutine(Transform interceptor, Animator interceptorAnimator, string reason)
+{
+    if (interceptor == null) yield break;
+
+    UpdateOSUI(
+        "- " + reason + "\n- CPU intercepta el balón",
+        interceptor.name,
+        "Interception"
+    );
+
+    Vector3 target = new Vector3(ball.position.x, 0f, ball.position.z);
+
+    yield return MovePlayer(interceptor, interceptorAnimator, target, 0.7f, 0.85f);
+
+    TriggerReceive(interceptorAnimator);
+    AttachBall(interceptor);
+
+    yield return new WaitForSeconds(1.2f);
+}
 }

@@ -16,8 +16,8 @@ public enum CommandResult
 public class FootballOSCommandSystem : MonoBehaviour
 {
     [Header("Timing")]
-    [SerializeField] private float stepDuration = 1.15f;
-    [SerializeField] private float targetProgress = 0.72f;
+    [SerializeField] private float stepDuration = 1.1f;
+    [SerializeField] private float targetProgress = 0.7f;
     [SerializeField] private float perfectWindow = 0.08f;
     [SerializeField] private float goodWindow = 0.18f;
     [SerializeField] private float badWindow = 0.32f;
@@ -41,12 +41,6 @@ public class FootballOSCommandSystem : MonoBehaviour
 
     public IEnumerator RunCommand(string commandName, KeyCode[] sequence, Action<CommandResult> onComplete)
     {
-        if (sequence == null || sequence.Length == 0)
-        {
-            onComplete?.Invoke(CommandResult.Miss);
-            yield break;
-        }
-
         IsRunning = true;
 
         float previousTimeScale = Time.timeScale;
@@ -80,21 +74,13 @@ public class FootballOSCommandSystem : MonoBehaviour
                     float difference = Mathf.Abs(progress - targetProgress);
 
                     if (difference <= perfectWindow)
-                    {
                         stepResult = CommandResult.Perfect;
-                    }
                     else if (difference <= goodWindow)
-                    {
                         stepResult = CommandResult.Good;
-                    }
                     else if (difference <= badWindow)
-                    {
                         stepResult = CommandResult.Bad;
-                    }
                     else
-                    {
                         stepResult = CommandResult.Miss;
-                    }
 
                     pressed = true;
                     break;
@@ -104,22 +90,19 @@ public class FootballOSCommandSystem : MonoBehaviour
             }
 
             if (!pressed)
-            {
                 stepResult = CommandResult.Miss;
-            }
 
             results.Add(stepResult);
             resultText.text = stepResult.ToString().ToUpper();
 
-            yield return WaitUnscaled(0.22f);
+            yield return WaitUnscaled(0.25f);
         }
 
         CommandResult finalResult = CalculateFinalResult(results);
 
         resultText.text = "RESULT: " + finalResult.ToString().ToUpper();
-        UpdateBar(1f);
 
-        yield return WaitUnscaled(0.65f);
+        yield return WaitUnscaled(0.7f);
 
         Time.timeScale = previousTimeScale;
         HideUI();
@@ -167,14 +150,7 @@ public class FootballOSCommandSystem : MonoBehaviour
         Canvas canvas = FindFirstObjectByType<Canvas>();
 
         if (canvas == null)
-        {
-            GameObject canvasObj = new GameObject("FootballOS_CommandCanvas");
-            canvas = canvasObj.AddComponent<Canvas>();
-            canvas.renderMode = RenderMode.ScreenSpaceOverlay;
-            canvas.sortingOrder = 200;
-            canvasObj.AddComponent<CanvasScaler>();
-            canvasObj.AddComponent<GraphicRaycaster>();
-        }
+            return;
 
         panel = new GameObject("CommandPanel");
         panel.transform.SetParent(canvas.transform, false);
@@ -184,14 +160,14 @@ public class FootballOSCommandSystem : MonoBehaviour
         panelRect.anchorMax = new Vector2(0.5f, 0f);
         panelRect.pivot = new Vector2(0.5f, 0f);
         panelRect.anchoredPosition = new Vector2(0f, 45f);
-        panelRect.sizeDelta = new Vector2(720f, 155f);
+        panelRect.sizeDelta = new Vector2(680f, 150f);
 
         Image panelImage = panel.AddComponent<Image>();
-        panelImage.color = new Color32(8, 14, 24, 225);
+        panelImage.color = new Color32(8, 14, 24, 230);
 
-        titleText = CreateText(panel.transform, "CommandTitle", new Vector2(20, -15), new Vector2(680, 34), 24, true);
-        sequenceText = CreateText(panel.transform, "CommandSequence", new Vector2(20, -55), new Vector2(680, 42), 28, true);
-        resultText = CreateText(panel.transform, "CommandResult", new Vector2(20, -100), new Vector2(680, 28), 18, true);
+        titleText = CreateText(panel.transform, "CommandTitle", new Vector2(20, -15), new Vector2(640, 32), 22);
+        sequenceText = CreateText(panel.transform, "CommandSequence", new Vector2(20, -52), new Vector2(640, 42), 28);
+        resultText = CreateText(panel.transform, "CommandResult", new Vector2(20, -98), new Vector2(640, 28), 18);
 
         GameObject barBg = new GameObject("TimingBarBG");
         barBg.transform.SetParent(panel.transform, false);
@@ -201,10 +177,10 @@ public class FootballOSCommandSystem : MonoBehaviour
         bgRect.anchorMax = new Vector2(0f, 0f);
         bgRect.pivot = new Vector2(0f, 0f);
         bgRect.anchoredPosition = new Vector2(20f, 15f);
-        bgRect.sizeDelta = new Vector2(680f, 12f);
+        bgRect.sizeDelta = new Vector2(640f, 12f);
 
         Image bgImage = barBg.AddComponent<Image>();
-        bgImage.color = new Color32(70, 80, 95, 255);
+        bgImage.color = new Color32(60, 70, 85, 255);
 
         GameObject barFill = new GameObject("TimingBarFill");
         barFill.transform.SetParent(barBg.transform, false);
@@ -220,9 +196,9 @@ public class FootballOSCommandSystem : MonoBehaviour
         fillImage.color = new Color32(0, 220, 255, 255);
     }
 
-    private TMP_Text CreateText(Transform parent, string name, Vector2 position, Vector2 size, int fontSize, bool bold)
+    private TMP_Text CreateText(Transform parent, string objectName, Vector2 position, Vector2 size, int fontSize)
     {
-        GameObject obj = new GameObject(name);
+        GameObject obj = new GameObject(objectName);
         obj.transform.SetParent(parent, false);
 
         RectTransform rect = obj.AddComponent<RectTransform>();
@@ -236,7 +212,7 @@ public class FootballOSCommandSystem : MonoBehaviour
         text.fontSize = fontSize;
         text.color = Color.white;
         text.alignment = TextAlignmentOptions.Center;
-        text.fontStyle = bold ? FontStyles.Bold : FontStyles.Normal;
+        text.fontStyle = FontStyles.Bold;
 
         return text;
     }
@@ -250,13 +226,9 @@ public class FootballOSCommandSystem : MonoBehaviour
             string keyName = GetKeyName(sequence[i]);
 
             if (i == currentIndex)
-            {
                 text += "<color=#00E5FF>[ " + keyName + " ]</color> ";
-            }
             else
-            {
                 text += keyName + " ";
-            }
         }
 
         sequenceText.text = text;
@@ -272,23 +244,18 @@ public class FootballOSCommandSystem : MonoBehaviour
     {
         if (fillBar == null) return;
 
-        float width = 680f * progress;
-        fillBar.sizeDelta = new Vector2(width, 0f);
+        fillBar.sizeDelta = new Vector2(640f * progress, 0f);
     }
 
     private void ShowUI()
     {
         if (panel != null)
-        {
             panel.SetActive(true);
-        }
     }
 
     private void HideUI()
     {
         if (panel != null)
-        {
             panel.SetActive(false);
-        }
     }
 }
