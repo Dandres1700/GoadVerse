@@ -74,7 +74,7 @@ public class FootballOSAnimationDemoAuto : MonoBehaviour
             yield return null;
         }
 
-        uiController = FindFirstObjectByType<FootballOSUIController>();
+        uiController = FindAnyObjectByType<FootballOSUIController>();
 
         PrepareBall();
 
@@ -525,7 +525,15 @@ public class FootballOSAnimationDemoAuto : MonoBehaviour
 
     private Vector3 GetBallPositionNear(Transform player)
     {
-        return player.position + player.forward * ballOffset + Vector3.up * ballHeight;
+        return player.position + player.forward * ballOffset * GetPlayerScale(player) + Vector3.up * ballHeight;
+    }
+
+    private float GetPlayerScale(Transform player)
+    {
+        if (player == null) return 1f;
+
+        Vector3 scale = player.lossyScale;
+        return Mathf.Max(0.01f, (Mathf.Abs(scale.x) + Mathf.Abs(scale.z)) * 0.5f);
     }
 
     private void SetPosition(Transform target, Vector3 position)
