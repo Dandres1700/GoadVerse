@@ -751,16 +751,18 @@ MonoBehaviour:
   target: {fileID: 0}
   targetName: Copa mundial (1)
   degreesPerSecond: 12
-  fixedLocalPosition: {x: 2.04, y: -0.7, z: 3.57}
-  fixedLocalScale: {x: 400, y: 400, z: 450}
-  forceExactLocalPosition: 1
-  forceExactLocalScale: 1
+  fixedLocalPosition: {x: -0.022418361, y: 0.00006914139, z: 0.00044448068}
+  fixedLocalScale: {x: 4, y: 4, z: 4}
+  forceExactLocalPosition: 0
+  forceExactLocalScale: 0
   rotateOnlyOnY: 1
   fixedRootEulerAngles: {x: 0, y: 0, z: 0}
-  forceRootRotation: 1
+  forceRootRotation: 0
   rotateVisualModel: 1
-  centerVisualChildren: 1
-  frameMainCamera: 1
+  centerVisualChildren: 0
+  keepOnGround: 1
+  groundY: 0
+  frameMainCamera: 0
   menuCameraPosition: {x: 0, y: 500, z: -900}
   menuCameraEulerAngles: {x: 0, y: 0, z: 0}
   menuCameraFarClip: 3000
@@ -1010,6 +1012,57 @@ MonoBehaviour:
   allowGamepadInteraction: 1
   gamepadInteractionButton: 330
   disableAfterUse: 1
+--- !u!1 &2147101000
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2147101001}
+  - component: {fileID: 2147101002}
+  m_Layer: 0
+  m_Name: MapBoundaryWalls
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2147101001
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2147101000}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &2147101002
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2147101000}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9ad0b66e4d6f4b04a98a49d2c2d3ad61, type: 3}
+  m_Name:
+  m_EditorClassIdentifier:
+  center: {x: 0, y: 0, z: 0}
+  playAreaSize: {x: 50, y: 50}
+  floorY: 0
+  wallHeight: 8
+  wallThickness: 1
+  wallMaterial: {fileID: 0}
+  gizmoColor: {r: 0.2, g: 0.7, b: 1, a: 0.35}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
@@ -1022,3 +1075,4 @@ SceneRoots:
   - {fileID: 1901000001}
   - {fileID: 1215754682}
   - {fileID: 1642040011}
+  - {fileID: 2147101001}

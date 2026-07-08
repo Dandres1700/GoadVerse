@@ -18,6 +18,10 @@ public class CopaRotator : MonoBehaviour
     [SerializeField] private bool rotateVisualModel = true;
     [SerializeField] private bool centerVisualChildren = true;
 
+    [Header("Placement")]
+    [SerializeField] private bool keepOnGround;
+    [SerializeField] private float groundY;
+
     [Header("Menu Camera")]
     [SerializeField] private bool frameMainCamera = true;
     [SerializeField] private Vector3 menuCameraPosition = new Vector3(0f, 500f, -900f);
@@ -36,6 +40,7 @@ public class CopaRotator : MonoBehaviour
         ResolveTarget();
         ApplyFixedRootTransform();
         SetupRotationTarget();
+        SnapTargetToGround();
         CacheCurrentRotation();
         ConfigureMenuCamera();
     }
@@ -57,6 +62,7 @@ public class CopaRotator : MonoBehaviour
 
         ApplyFixedRootTransform();
         SetupRotationTarget();
+        SnapTargetToGround();
 
         if (!hasCurrentRotation)
         {
@@ -173,21 +179,44 @@ public class CopaRotator : MonoBehaviour
 
     private Vector3 GetRendererCenter()
     {
-        Renderer[] renderers = target.GetComponentsInChildren<Renderer>();
-
-        if (renderers.Length == 0)
+        if (!TryGetRendererBounds(out Bounds bounds))
         {
             return target.position;
         }
 
-        Bounds bounds = renderers[0].bounds;
+        return bounds.center;
+    }
+
+    private bool TryGetRendererBounds(out Bounds bounds)
+    {
+        bounds = default;
+
+        if (target == null) return false;
+
+        Renderer[] renderers = target.GetComponentsInChildren<Renderer>();
+
+        if (renderers.Length == 0) return false;
+
+        bounds = renderers[0].bounds;
 
         for (int i = 1; i < renderers.Length; i++)
         {
             bounds.Encapsulate(renderers[i].bounds);
         }
 
-        return bounds.center;
+        return true;
+    }
+
+    private void SnapTargetToGround()
+    {
+        if (!keepOnGround || target == null) return;
+        if (!TryGetRendererBounds(out Bounds bounds)) return;
+
+        float yOffset = groundY - bounds.min.y;
+
+        if (Mathf.Abs(yOffset) <= 0.001f) return;
+
+        target.position += Vector3.up * yOffset;
     }
 
     private Transform GetRotationTarget()
