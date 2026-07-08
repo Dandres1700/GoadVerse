@@ -27,5 +27,29 @@ public class PlayerFootballAnimationsTest : MonoBehaviour
             Debug.Log("SHOOT ACTIVADO");
             animator.SetTrigger("Shoot");
         }
+
+        if (Input.GetKeyDown(KeyCode.P))
+        {
+            Debug.Log("PASS ACTIVADO");
+            animator.SetTrigger("Pass");
+        }
+
+        if (Input.GetKeyDown(KeyCode.R))
+        {
+            Debug.Log("RECEIVE ACTIVADO");
+            animator.SetTrigger("Receive");
+        }
+
+        if (Input.GetKeyDown(KeyCode.T))
+        {
+            Debug.Log("TACKLE ACTIVADO");
+            animator.SetTrigger("Tackle");
+        }
+
+        if (Input.GetKeyDown(KeyCode.C))
+        {
+            Debug.Log("CELEBRATE ACTIVADO");
+            animator.SetTrigger("Celebrate");
+        }
     }
 }
