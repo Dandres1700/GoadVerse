@@ -6,13 +6,17 @@ usar el portal de futbol para entrar al `minijuego1`.
 
 ## Estado actual del juego
 
-- Menu principal con botones para jugar, opciones y salir.
+- Menu principal con fondo personalizado, botones visuales, musica de inicio y
+  copa 3D giratoria frente al fondo.
 - Lobby con personaje, camara en tercera persona y portal interactivo.
 - Entrada al minijuego de futbol al acercarse al portal y presionar `E`.
 - Movimiento 3D con teclado y mando.
 - Camara con seguimiento del jugador y zoom con scroll del mouse.
 - Animaciones base de caminar, correr, saltar y acciones de futbol.
 - Paredes invisibles para delimitar el lobby y la cancha del minijuego.
+- Balon del minijuego ajustado de escala, con rebote y respuesta al patearlo.
+- Demo Football OS en `minijuego1` con jugadores de prueba, balon, camara
+  cinematic/override y acciones de pase/recepcion.
 - Copa giratoria en el lobby/menu con posicion controlada por escena.
 
 ## Requisitos
@@ -45,6 +49,10 @@ carga `Menu_Principal` usando `SceneLoader`.
 Desde `Menu_Principal`, el boton `Play` llama a `MainMenuManager.OnJugarPressed`
 y carga `Lobby`.
 
+`Menu_Principal` usa un fondo 2D en `Canvas3D` y una copa 3D por delante. Ese
+canvas esta renderizado por camara para que el fondo no tape la copa. La copa se
+mantiene girando con `CopaRotator`.
+
 En `Lobby`, el objeto `Portal_Futbol` usa `MinigamePortal`. El jugador debe
 estar cerca y presionar `E` para cargar `minijuego1`.
 
@@ -73,6 +81,11 @@ Pruebas de animaciones de futbol en `minijuego1`:
 - `T`: tackle.
 - `C`: celebracion.
 
+El demo automatico de Football OS se apoya en `FootballOSAnimationDemoAuto`,
+`FootballOSCinematicCamera` y `FootballOSCameraOverride`. Si se edita esta demo,
+verificar que no queden marcadores de merge (`<<<<<<<`, `=======`, `>>>>>>>`) en
+el script ni en la escena.
+
 Mando:
 
 - Stick izquierdo: movimiento.
@@ -88,10 +101,14 @@ El proyecto esta organizado por responsabilidades:
 - `Assets/Scripts/Player`: movimiento, camara y control de animaciones.
 - `Assets/Scripts/Interactables`: portal hacia minijuegos.
 - `Assets/Scripts/UI`: comportamiento visual de elementos como la copa.
+- `Assets/Scripts/ButtonHoverEffect`: efectos de hover para botones del menu.
 - `Assets/Scenes`: escenas jugables y flujo principal.
 - `Assets/Maps`: mapa/cancha del minijuego.
 - `Assets/Animations`: animaciones del personaje y acciones de futbol.
-- `Assets/Textures` y `Assets/Models`: modelos, imagenes y texturas.
+- `Assets/Audio`: musica, sonidos de botones y audio de inicio.
+- `Assets/Textures/Menu_Inicio`: fondos e imagenes del menu principal.
+- `Assets/Textures/UI`: paquetes de UI/VFX importados y organizados.
+- `Assets/Textures` y `Assets/Models`: modelos, imagenes y texturas generales.
 
 Para agregar un nuevo minijuego:
 
@@ -112,6 +129,21 @@ Para agregar animaciones:
    `Speed`, `IsRunning`, `IsGrounded`, `VerticalSpeed`, `Jump`, `Shoot`,
    `Pass`, `Receive`, `Tackle`, `Celebrate`.
 
+Para ajustar la copa del menu principal:
+
+1. Seleccionar `Copa mundial (1)` en `Menu_Principal`.
+2. Ajustar el `Transform` en el Inspector.
+3. Copiar esos mismos valores al componente `CopaRotator`:
+   `fixedLocalPosition` y `fixedLocalScale`.
+4. Si se quiere moverla libremente sin que el script la corrija al dar Play,
+   desactivar `forceExactLocalPosition` y `forceExactLocalScale`.
+
+Valores actuales de la copa del menu:
+
+- Position: `X -105`, `Y -133`, `Z 316`.
+- Rotation: `X 0`, `Y 0`, `Z 0`.
+- Scale: `X 350`, `Y 350`, `Z 350`.
+
 ## Convenciones de trabajo
 
 - Guardar escenas antes de subir cambios.
@@ -119,6 +151,10 @@ Para agregar animaciones:
 - Mantener assets importados en carpetas separadas por origen.
 - Agregar credito y licencia cuando se importe un asset externo.
 - Probar el flujo completo: `Bootstrap -> Menu_Principal -> Lobby -> minijuego1`.
+- Revisar el menu principal despues de tocar el Canvas o la copa, porque el
+  fondo debe quedar detras del modelo 3D.
+- En escenas serializadas de Unity, limpiar cualquier conflicto de merge antes
+  de abrir Play Mode.
 
 ## Creditos y agradecimientos
 
@@ -134,6 +170,9 @@ importados en este proyecto:
   - "Manufacturing Consent" by The Manufacturing Consent Project Authors, licensed under SIL Open Font License 1.1.
   - "MedievalSharp" by wmk69, licensed under SIL Open Font License 1.1.
 - "Demo VFX - Impact & Hit" / VFX Impact assets (https://wallcoeur.itch.io/demo-vfx-impact-hit) by wallcoeur / Cartoon VFX by Wallcoeur are used as imported VFX resources.
+- "8Bit Music - 062022" by GWriterStudio is imported under
+  `Assets/Audio/8Bit Music - 062022`. The local notes credit GWriterStudio and
+  list 10 tracks; confirm the original license/source before distributing.
 - TextMesh Pro, Unity UI, Input System, URP and other Unity packages are provided by Unity Technologies under their package and Unity terms.
 
 ## Recursos pendientes por confirmar
@@ -145,8 +184,11 @@ version distribuible:
 
 - `Assets/Models/ballon/Ball.blend`
 - `Assets/Textures/Menu_Inicio/Menu_Inicio.jpeg`
+- `Assets/Textures/Menu_Inicio/Fondo/Fondo_Menu.png`
 - `Assets/Textures/Botones/*.png`
 - `Assets/Audio/BotonSonido.wav`
+- `Assets/Audio/Inicio/Title_Juego.mp3`
+- `Assets/Audio/8Bit Music - 062022/*.wav`
 
 ## Notas de licencia
 
@@ -154,7 +196,7 @@ Este README no reemplaza las licencias originales de cada asset. Cuando se
 redistribuya el proyecto, conservar los archivos de licencia incluidos en las
 carpetas de los paquetes importados, especialmente:
 
-- `Assets/Alebardium/Bloodlines UI/Third-Party Notices.txt`
-- `Assets/Alebardium/Bloodlines UI/Fonts/ManufacturingConsent/OFL.txt`
-- `Assets/Alebardium/Bloodlines UI/Fonts/MedievalSharp/OFL.txt`
+- `Assets/Textures/UI/Alebardium/Bloodlines UI/Third-Party Notices.txt`
+- `Assets/Textures/UI/Alebardium/Bloodlines UI/Fonts/ManufacturingConsent/OFL.txt`
+- `Assets/Textures/UI/Alebardium/Bloodlines UI/Fonts/MedievalSharp/OFL.txt`
 - Licencias incluidas con TextMesh Pro y fuentes usadas por Unity.
