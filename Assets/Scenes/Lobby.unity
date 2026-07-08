@@ -651,7 +651,7 @@ MonoBehaviour:
   maxRiseSpeed: 12
   cameraTransform: {fileID: 330585546}
   animator: {fileID: 1584875526}
-  persistAcrossScenes: 1
+  persistAcrossScenes: 0
   mainMenuSceneName: Menu_Principal
   keepCameraFollowingPlayer: 1
   cameraFollowOffset: {x: 0, y: 3, z: -6}
