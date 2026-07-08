@@ -23,8 +23,8 @@ public class FootballOSFullMatchController : MonoBehaviour
 
     [Header("Balón")]
     [SerializeField] private string ballName = "Ball";
-    [SerializeField] private float ballHeight = 0.18f;
-    [SerializeField] private float ballOffset = 0.9f;
+    [SerializeField] private float ballHeight = 0.43f;
+    [SerializeField] private float ballOffset = 1.25f;
     [SerializeField] private float passArcHeight = 0.45f;
 
     [Header("Campo")]

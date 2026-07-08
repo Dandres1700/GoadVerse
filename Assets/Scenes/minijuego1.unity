@@ -4822,8 +4822,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::FootballOSFullMatchController
   canchaSceneName: minijuego1
   ballName: Ball
-  ballHeight: 0.18
-  ballOffset: 0.9
+  ballHeight: 0.43
+  ballOffset: 1.25
   passArcHeight: 0.45
   centerX: -4
   playerGoalZ: -14
@@ -5198,8 +5198,8 @@ Transform:
   m_GameObject: {fileID: 1865814584}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0.23395, y: 0.25, z: 0.9425}
-  m_LocalScale: {x: 0.5, y: 0.5, z: 0.5}
+  m_LocalPosition: {x: 0.23395, y: 0.43, z: 0.9425}
+  m_LocalScale: {x: 0.85, y: 0.85, z: 0.85}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
@@ -5217,7 +5217,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   forceHalfScale: 1
-  halfScale: {x: 0.5, y: 0.5, z: 0.5}
+  halfScale: {x: 0.85, y: 0.85, z: 0.85}
   bounceForce: 0.5
   dynamicFriction: 0
   staticFriction: 0
