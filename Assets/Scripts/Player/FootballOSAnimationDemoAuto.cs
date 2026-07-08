@@ -17,11 +17,11 @@ public class FootballOSAnimationDemoAuto : MonoBehaviour
 
     [Header("Posicion del balon")]
     [SerializeField] private float ballForwardOffset = 1.2f;
-    [SerializeField] private float ballHeight = 0.16f;
+    [SerializeField] private float ballHeight = 0.25f;
 
     [Header("Disparo")]
     [SerializeField] private float kickDelay = 0.55f;
-    [SerializeField] private float shootForce = 3.5f;
+    [SerializeField] private float shootForce = 0.5f;
     [SerializeField] private float shootLiftForce = 0.05f;
 
     [Header("Control del balon en la demo")]

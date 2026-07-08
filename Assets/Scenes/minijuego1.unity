@@ -802,9 +802,9 @@ MonoBehaviour:
   playDemoOnStart: 1
   loopDemo: 0
   ballForwardOffset: 1.2
-  ballHeight: 0.16
+  ballHeight: 0.25
   kickDelay: 0.55
-  shootForce: 3.5
+  shootForce: 0.5
   shootLiftForce: 0.05
   stopBallAfterSeconds: 1.4
   visibleBallDistance: 5
@@ -836,6 +836,7 @@ GameObject:
   - component: {fileID: 1865814587}
   - component: {fileID: 1865814586}
   - component: {fileID: 1865814585}
+  - component: {fileID: 1865814590}
   m_Layer: 0
   m_Name: Ball
   m_TagString: Untagged
@@ -957,12 +958,31 @@ Transform:
   m_GameObject: {fileID: 1865814584}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0.23395, y: 0.5, z: 0.9425}
-  m_LocalScale: {x: 0.25, y: 0.25, z: 0.25}
+  m_LocalPosition: {x: 0.23395, y: 0.25, z: 0.9425}
+  m_LocalScale: {x: 0.5, y: 0.5, z: 0.5}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1865814590
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1865814584}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b8e741f0a97b4e7e8e8d6f37d9ab2a4c, type: 3}
+  m_Name:
+  m_EditorClassIdentifier:
+  forceHalfScale: 1
+  halfScale: {x: 0.5, y: 0.5, z: 0.5}
+  bounceForce: 0.5
+  dynamicFriction: 0
+  staticFriction: 0
+  linearDamping: 0
+  angularDamping: 0.05
 --- !u!1 &1868869436
 GameObject:
   m_ObjectHideFlags: 0
@@ -1351,6 +1371,7 @@ MonoBehaviour:
   wallHeight: 12
   wallThickness: 2
   wallMaterial: {fileID: 0}
+  wallBounciness: 0.5
   gizmoColor: {r: 0.2, g: 0.7, b: 1, a: 0.35}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
@@ -1364,9 +1385,6 @@ SceneRoots:
   - {fileID: 1779460904}
   - {fileID: 44458138}
   - {fileID: 1865814589}
-<<<<<<< HEAD
   - {fileID: 1228135879}
   - {fileID: 2003169937}
-=======
   - {fileID: 2147201001}
->>>>>>> 2c5c0b8532cb18998f29ff6c87cab2841728de50
