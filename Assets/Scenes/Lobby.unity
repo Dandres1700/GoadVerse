@@ -704,6 +704,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerFootballAnimationsTest
   canchaSceneName: minijuego1
+  ballObjectName: Ball
+  kickForce: 0.5
+  passKickDelay: 0.6
+  shootKickDelay: 0.7
+  passLiftForce: 0.2
+  shootLiftForce: 0.8
 --- !u!1 &1642040010
 GameObject:
   m_ObjectHideFlags: 0
@@ -832,7 +838,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 31321ba15b8f8eb4c954353edc038b1d, type: 2}
+  - {fileID: 2100000, guid: 2e2ee01058a5e0d40b98651f57dfd3a1, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -907,13 +913,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1901000000}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 2.81, z: 18.09}
-  m_LocalScale: {x: 3, y: 6, z: 0.4}
+  m_LocalRotation: {x: 0, y: 0, z: -1, w: 0}
+  m_LocalPosition: {x: 0, y: 2.7, z: 18.09}
+  m_LocalScale: {x: 8, y: 7, z: 0.4}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 180, y: 180, z: 0}
 --- !u!33 &1901000002
 MeshFilter:
   m_ObjectHideFlags: 0
@@ -947,7 +953,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 31321ba15b8f8eb4c954353edc038b1d, type: 2}
+  - {fileID: 2100000, guid: 24301b5bc1549864e9cd055f55315f9e, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -1054,14 +1060,15 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 9ad0b66e4d6f4b04a98a49d2c2d3ad61, type: 3}
-  m_Name:
-  m_EditorClassIdentifier:
+  m_Name: 
+  m_EditorClassIdentifier: 
   center: {x: 0, y: 0, z: 0}
   playAreaSize: {x: 50, y: 50}
   floorY: 0
   wallHeight: 8
   wallThickness: 1
   wallMaterial: {fileID: 0}
+  wallBounciness: 0.5
   gizmoColor: {r: 0.2, g: 0.7, b: 1, a: 0.35}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
