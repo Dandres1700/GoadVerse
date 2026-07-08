@@ -217,35 +217,37 @@ public class FootballOSFullMatchController : MonoBehaviour
 
     private void PrepareFormations()
 {
-    playerBase[0] = new Vector3(centerX, 0f, -19f);
+    // ECUADOR - 4-3-3
+    playerBase[0] = new Vector3(centerX, 0f, -20f);       // P_GK
 
-    playerBase[1] = new Vector3(centerX - 8f, 0f, -13f);
-    playerBase[2] = new Vector3(centerX - 3f, 0f, -14f);
-    playerBase[3] = new Vector3(centerX + 3f, 0f, -14f);
-    playerBase[4] = new Vector3(centerX + 8f, 0f, -13f);
+    playerBase[1] = new Vector3(centerX - 9f, 0f, -13f);  // P_LB
+    playerBase[2] = new Vector3(centerX - 3f, 0f, -14f);  // P_CB1
+    playerBase[3] = new Vector3(centerX + 3f, 0f, -14f);  // P_CB2
+    playerBase[4] = new Vector3(centerX + 9f, 0f, -13f);  // P_RB
 
-    playerBase[5] = new Vector3(centerX - 8.5f, 0f, -4f);
-    playerBase[6] = new Vector3(centerX, 0f, -3f);
-    playerBase[7] = new Vector3(centerX + 8.5f, 0f, -4f);
+    playerBase[5] = new Vector3(centerX - 7f, 0f, -5f);   // P_LM
+    playerBase[6] = new Vector3(centerX, 0f, -4f);        // P_CM
+    playerBase[7] = new Vector3(centerX + 7f, 0f, -5f);   // P_RM
 
-    playerBase[8] = new Vector3(centerX - 8.5f, 0f, 7f);
-    playerBase[9] = new Vector3(centerX, 0f, 10f);
-    playerBase[10] = new Vector3(centerX + 8.5f, 0f, 7f);
+    playerBase[8] = new Vector3(centerX - 9f, 0f, 6f);    // P_LW
+    playerBase[9] = new Vector3(centerX, 0f, 9f);         // P_ST
+    playerBase[10] = new Vector3(centerX + 9f, 0f, 6f);   // P_RW
 
-    rivalBase[0] = new Vector3(centerX, 0f, 21f);
+    // CPU - 4-3-3
+    rivalBase[0] = new Vector3(centerX, 0f, 22f);         // R_GK
 
-    rivalBase[1] = new Vector3(centerX + 8f, 0f, 15f);
-    rivalBase[2] = new Vector3(centerX + 3f, 0f, 16f);
-    rivalBase[3] = new Vector3(centerX - 3f, 0f, 16f);
-    rivalBase[4] = new Vector3(centerX - 8f, 0f, 15f);
+    rivalBase[1] = new Vector3(centerX + 9f, 0f, 14f);    // R_LB
+    rivalBase[2] = new Vector3(centerX + 3f, 0f, 15f);    // R_CB1
+    rivalBase[3] = new Vector3(centerX - 3f, 0f, 15f);    // R_CB2
+    rivalBase[4] = new Vector3(centerX - 9f, 0f, 14f);    // R_RB
 
-    rivalBase[5] = new Vector3(centerX + 8.5f, 0f, 6f);
-    rivalBase[6] = new Vector3(centerX, 0f, 5f);
-    rivalBase[7] = new Vector3(centerX - 8.5f, 0f, 6f);
+    rivalBase[5] = new Vector3(centerX + 7f, 0f, 5f);     // R_LM
+    rivalBase[6] = new Vector3(centerX, 0f, 4f);          // R_CM
+    rivalBase[7] = new Vector3(centerX - 7f, 0f, 5f);     // R_RM
 
-    rivalBase[8] = new Vector3(centerX + 8.5f, 0f, -5f);
-    rivalBase[9] = new Vector3(centerX, 0f, -8f);
-    rivalBase[10] = new Vector3(centerX - 8.5f, 0f, -5f);
+    rivalBase[8] = new Vector3(centerX + 9f, 0f, -6f);    // R_LW
+    rivalBase[9] = new Vector3(centerX, 0f, -9f);         // R_ST
+    rivalBase[10] = new Vector3(centerX - 9f, 0f, -6f);   // R_RW
 }
 
     private void PrepareBall()
@@ -294,31 +296,63 @@ public class FootballOSFullMatchController : MonoBehaviour
 }
 
     private void SetupKickOff()
+{
+    // ECUADOR - 4-3-3, ocupando toda la cancha
+    playerBase[0] = new Vector3(centerX, 0.4f, -20f);       // P_GK
+
+    playerBase[1] = new Vector3(centerX - 9f, 0.4f, -13f);  // P_LB
+    playerBase[2] = new Vector3(centerX - 3f, 0.4f, -14f);  // P_CB1
+    playerBase[3] = new Vector3(centerX + 3f, 0.4f, -14f);  // P_CB2
+    playerBase[4] = new Vector3(centerX + 9f, 0.4f, -13f);  // P_RB
+
+    playerBase[5] = new Vector3(centerX - 8f, 0.4f, -4f);   // P_LM
+    playerBase[6] = new Vector3(centerX, 0.4f, -3f);        // P_CM
+    playerBase[7] = new Vector3(centerX + 8f, 0.4f, -4f);   // P_RM
+
+    playerBase[8] = new Vector3(centerX - 9f, 0.4f, 7f);    // P_LW
+    playerBase[9] = new Vector3(centerX, 0.4f, 10f);        // P_ST
+    playerBase[10] = new Vector3(centerX + 9f, 0.4f, 7f);   // P_RW
+
+    // CPU - 4-3-3, ocupando el lado contrario
+    rivalBase[0] = new Vector3(centerX, 0.4f, 22f);         // R_GK
+
+    rivalBase[1] = new Vector3(centerX + 9f, 0.4f, 15f);    // R_LB
+    rivalBase[2] = new Vector3(centerX + 3f, 0.4f, 16f);    // R_CB1
+    rivalBase[3] = new Vector3(centerX - 3f, 0.4f, 16f);    // R_CB2
+    rivalBase[4] = new Vector3(centerX - 9f, 0.4f, 15f);    // R_RB
+
+    rivalBase[5] = new Vector3(centerX + 8f, 0.4f, 6f);     // R_LM
+    rivalBase[6] = new Vector3(centerX, 0.4f, 5f);          // R_CM
+    rivalBase[7] = new Vector3(centerX - 8f, 0.4f, 6f);     // R_RM
+
+    rivalBase[8] = new Vector3(centerX + 9f, 0.4f, -6f);    // R_LW
+    rivalBase[9] = new Vector3(centerX, 0.4f, -9f);         // R_ST
+    rivalBase[10] = new Vector3(centerX - 9f, 0.4f, -6f);   // R_RW
+
+    for (int i = 0; i < 11; i++)
     {
-        for (int i = 0; i < 11; i++)
-        {
-            playerTeam[i].position = playerBase[i];
-            rivalTeam[i].position = rivalBase[i];
+        playerTeam[i].position = playerBase[i];
+        rivalTeam[i].position = rivalBase[i];
 
-            SetSpeed(playerAnimators[i], 0f);
-            SetSpeed(rivalAnimators[i], 0f);
+        SetSpeed(playerAnimators[i], 0f);
+        SetSpeed(rivalAnimators[i], 0f);
 
-            playerBusy[i] = false;
-            rivalBusy[i] = false;
-        }
-
-        playerPossession = true;
-        ownerIndex = 6;
-
-        LookAtFlat(playerTeam[6], rivalTeam[0].position);
-        AttachBall(playerTeam[6]);
-
-        UpdateUI(
-            "- Kick off desde media cancha\n- Ecuador inicia posesión",
-            "P_CM",
-            "Build Up"
-        );
+        playerBusy[i] = false;
+        rivalBusy[i] = false;
     }
+
+    playerPossession = true;
+    ownerIndex = 6;
+
+    LookAtFlat(playerTeam[6], rivalTeam[0].position);
+    AttachBall(playerTeam[6]);
+
+    UpdateUI(
+        "- Kick off desde media cancha\n- Ecuador inicia posesión",
+        "P_CM",
+        "Build Up"
+    );
+}
 
     private IEnumerator EcuadorAttack()
     {
@@ -618,7 +652,7 @@ public class FootballOSFullMatchController : MonoBehaviour
     lastCommandResult = CommandGrade.Miss;
 
     float previousTimeScale = Time.timeScale;
-    Time.timeScale = 0.45f;
+    Time.timeScale = 0.85f;
 
     int perfectCount = 0;
     int goodCount = 0;
@@ -641,7 +675,7 @@ public class FootballOSFullMatchController : MonoBehaviour
         KeyCode expected = sequence[i];
 
         float timer = 0f;
-        float duration = 1.05f;
+        float duration = 0.85f;
         bool pressed = false;
 
         while (timer < duration)
@@ -691,7 +725,7 @@ public class FootballOSFullMatchController : MonoBehaviour
             missCount++;
         }
 
-        yield return new WaitForSecondsRealtime(0.12f);
+        yield return new WaitForSecondsRealtime(0.05f);
     }
 
     if (missCount > 0)
@@ -850,41 +884,38 @@ public class FootballOSFullMatchController : MonoBehaviour
 
     if (index == 0)
     {
-        float goalkeeperX = Mathf.Clamp(ball.position.x, centerX - 4f, centerX + 4f);
-        return new Vector3(goalkeeperX, 0f, basePosition.z);
+        float goalkeeperX = Mathf.Clamp(ball.position.x, centerX - 3.5f, centerX + 3.5f);
+        return new Vector3(goalkeeperX, 0.4f, basePosition.z);
     }
 
     float attackDirection = isPlayerTeam ? 1f : -1f;
 
-    if (!teamHasBall)
-    {
-        Transform markTarget = FindClosestOpponentForMarking(basePosition, isPlayerTeam);
+    float xInfluence = Mathf.Clamp((ball.position.x - centerX) * 0.12f, -1.5f, 1.5f);
+    float zInfluence = Mathf.Clamp((ball.position.z - basePosition.z) * 0.05f, -1.8f, 1.8f);
 
-        if (markTarget != null)
-        {
-            Vector3 markPosition = Vector3.Lerp(basePosition, markTarget.position, 0.35f);
-            markPosition.y = 0f;
-            return markPosition;
-        }
-    }
-
-    float ballXInfluence = Mathf.Clamp((ball.position.x - centerX) * 0.35f, -3f, 3f);
-    float ballZInfluence = Mathf.Clamp((ball.position.z - basePosition.z) * 0.18f, -4f, 4f);
+    Vector3 target;
 
     if (teamHasBall)
     {
-        return new Vector3(
-            basePosition.x + ballXInfluence + Random.Range(-0.15f, 0.15f),
-            0f,
-            basePosition.z + ballZInfluence + attackDirection * 1.5f
+        target = new Vector3(
+            basePosition.x + xInfluence,
+            0.4f,
+            basePosition.z + zInfluence + attackDirection * 0.8f
+        );
+    }
+    else
+    {
+        target = new Vector3(
+            basePosition.x + xInfluence,
+            0.4f,
+            basePosition.z + zInfluence
         );
     }
 
-    return new Vector3(
-        basePosition.x + ballXInfluence,
-        0f,
-        basePosition.z + ballZInfluence
-    );
+    target.x = Mathf.Clamp(target.x, centerX - 10f, centerX + 10f);
+    target.z = Mathf.Clamp(target.z, playerGoalZ + 2f, rivalGoalZ - 2f);
+
+    return target;
 }
 
     private Transform FindClosestOpponentForMarking(Vector3 basePosition, bool isPlayerTeam)

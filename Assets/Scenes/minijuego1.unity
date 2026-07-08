@@ -3147,8 +3147,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1779460904}
-  - component: {fileID: 1779460903}
-  - component: {fileID: 1779460905}
   - component: {fileID: 1779460906}
   - component: {fileID: 1779460907}
   m_Layer: 0
@@ -3158,33 +3156,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &1779460903
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1779460902}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 380239df2f46a6141b4d3333b0072b97, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::FootballOSAnimationDemoAuto
-  canchaSceneName: minijuego1
-  midfielderName: Player_Midfielder
-  leftName: Player_Left
-  forwardName: Player_Forward
-  rightName: Player_Right
-  defenderName: Player_Defender
-  rivalDefender2Name: Rival_Defender_2
-  rivalDefender3Name: Rival_Defender_3
-  goalkeeperName: Rival_Goalkeeper
-  ballName: Ball
-  ballHeight: 0.18
-  ballOffset: 0.9
-  passArcHeight: 1.2
-  playOnStart: 1
-  loopDemo: 1
 --- !u!4 &1779460904
 Transform:
   m_ObjectHideFlags: 0
@@ -3200,24 +3171,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1779460905
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1779460902}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8c815ef05b4d657459389eaca6809085, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::FootballOSCommandSystem
-  stepDuration: 1.1
-  targetProgress: 0.7
-  perfectWindow: 0.08
-  goodWindow: 0.18
-  badWindow: 0.32
-  commandTimeScale: 0.35
 --- !u!114 &1779460906
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3236,15 +3189,15 @@ MonoBehaviour:
   ballOffset: 0.9
   passArcHeight: 0.45
   centerX: -4
-  playerGoalZ: -20
-  rivalGoalZ: 22
-  supportMoveSpeed: 3.6
-  carrySpeed: 0.85
+  playerGoalZ: -22
+  rivalGoalZ: 24
+  supportMoveSpeed: 5
+  carrySpeed: 0.9
   loopMatch: 1
-  actionsPerPossession: 8
-  commandEveryActions: 3
-  minPassDistance: 3
-  maxPassDistance: 13
+  actionsPerPossession: 14
+  commandEveryActions: 7
+  minPassDistance: 6
+  maxPassDistance: 24
 --- !u!114 &1779460907
 MonoBehaviour:
   m_ObjectHideFlags: 0

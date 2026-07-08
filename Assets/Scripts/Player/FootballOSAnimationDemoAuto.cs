@@ -588,11 +588,12 @@ yield return PassToMovingPlayer(
     }
 
     private void SetPosition(Transform target, Vector3 position)
-    {
-        if (target == null) return;
+{
+    if (target == null) return;
 
-        target.position = position;
-    }
+    position.y = 0.4f;
+    target.position = position;
+}
 
     private void LookAtFlat(Transform who, Vector3 target)
     {
