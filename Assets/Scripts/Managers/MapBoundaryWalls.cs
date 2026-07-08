@@ -12,6 +12,7 @@ public class MapBoundaryWalls : MonoBehaviour
     [SerializeField] private float wallHeight = 8f;
     [SerializeField] private float wallThickness = 1f;
     [SerializeField] private PhysicsMaterial wallMaterial = null;
+    [SerializeField] private float wallBounciness = 0.5f;
 
     [Header("Gizmos")]
     [SerializeField] private Color gizmoColor = new Color(0.2f, 0.7f, 1f, 0.35f);
@@ -20,6 +21,8 @@ public class MapBoundaryWalls : MonoBehaviour
     private const string SouthWallName = "InvisibleWall_South";
     private const string EastWallName = "InvisibleWall_East";
     private const string WestWallName = "InvisibleWall_West";
+
+    private PhysicsMaterial runtimeWallMaterial;
 
     private void Awake()
     {
@@ -82,7 +85,30 @@ public class MapBoundaryWalls : MonoBehaviour
         wallCollider.isTrigger = false;
         wallCollider.center = Vector3.zero;
         wallCollider.size = colliderSize;
-        wallCollider.material = wallMaterial;
+        wallCollider.material = GetWallMaterial();
+    }
+
+    private PhysicsMaterial GetWallMaterial()
+    {
+        if (wallMaterial != null)
+        {
+            return wallMaterial;
+        }
+
+        if (runtimeWallMaterial == null)
+        {
+            runtimeWallMaterial = new PhysicsMaterial("Runtime Boundary Bounce")
+            {
+                dynamicFriction = 0f,
+                staticFriction = 0f,
+                bounciness = wallBounciness,
+                frictionCombine = PhysicsMaterialCombine.Minimum,
+                bounceCombine = PhysicsMaterialCombine.Maximum
+            };
+        }
+
+        runtimeWallMaterial.bounciness = wallBounciness;
+        return runtimeWallMaterial;
     }
 
     private void OnValidate()
@@ -91,6 +117,7 @@ public class MapBoundaryWalls : MonoBehaviour
         playAreaSize.y = Mathf.Max(1f, playAreaSize.y);
         wallHeight = Mathf.Max(1f, wallHeight);
         wallThickness = Mathf.Max(0.1f, wallThickness);
+        wallBounciness = Mathf.Clamp01(wallBounciness);
     }
 
     private void OnDrawGizmosSelected()

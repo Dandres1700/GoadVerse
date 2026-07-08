@@ -1223,6 +1223,16 @@ MonoBehaviour:
   passArcHeight: 1.2
   playOnStart: 1
   loopDemo: 0
+<<<<<<< HEAD
+=======
+  ballForwardOffset: 1.2
+  ballHeight: 0.25
+  kickDelay: 0.55
+  shootForce: 0.5
+  shootLiftForce: 0.05
+  stopBallAfterSeconds: 1.4
+  visibleBallDistance: 5
+>>>>>>> dc43c262ffe1e7d298c0f77c277402d8f4102409
 --- !u!4 &1779460904
 Transform:
   m_ObjectHideFlags: 0
@@ -1321,6 +1331,7 @@ GameObject:
   - component: {fileID: 1865814587}
   - component: {fileID: 1865814586}
   - component: {fileID: 1865814585}
+  - component: {fileID: 1865814590}
   m_Layer: 0
   m_Name: Ball
   m_TagString: Untagged
@@ -1442,14 +1453,38 @@ Transform:
   m_GameObject: {fileID: 1865814584}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0.23395, y: 0.5, z: 0.9425}
-  m_LocalScale: {x: 0.25, y: 0.25, z: 0.25}
+  m_LocalPosition: {x: 0.23395, y: 0.25, z: 0.9425}
+  m_LocalScale: {x: 0.5, y: 0.5, z: 0.5}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+<<<<<<< HEAD
 --- !u!1001 &1884084837
 PrefabInstance:
+=======
+--- !u!114 &1865814590
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1865814584}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b8e741f0a97b4e7e8e8d6f37d9ab2a4c, type: 3}
+  m_Name:
+  m_EditorClassIdentifier:
+  forceHalfScale: 1
+  halfScale: {x: 0.5, y: 0.5, z: 0.5}
+  bounceForce: 0.5
+  dynamicFriction: 0
+  staticFriction: 0
+  linearDamping: 0
+  angularDamping: 0.05
+--- !u!1 &1868869436
+GameObject:
+>>>>>>> dc43c262ffe1e7d298c0f77c277402d8f4102409
   m_ObjectHideFlags: 0
   serializedVersion: 2
   m_Modification:
@@ -1902,6 +1937,61 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+<<<<<<< HEAD
+=======
+--- !u!1 &2147201000
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2147201001}
+  - component: {fileID: 2147201002}
+  m_Layer: 0
+  m_Name: MapBoundaryWalls
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2147201001
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2147201000}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &2147201002
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2147201000}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9ad0b66e4d6f4b04a98a49d2c2d3ad61, type: 3}
+  m_Name:
+  m_EditorClassIdentifier:
+  center: {x: -6.88477, y: 0, z: -14.53401}
+  playAreaSize: {x: 105, y: 68}
+  floorY: 0
+  wallHeight: 12
+  wallThickness: 2
+  wallMaterial: {fileID: 0}
+  wallBounciness: 0.5
+  gizmoColor: {r: 0.2, g: 0.7, b: 1, a: 0.35}
+>>>>>>> dc43c262ffe1e7d298c0f77c277402d8f4102409
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
@@ -1916,3 +2006,7 @@ SceneRoots:
   - {fileID: 1865814589}
   - {fileID: 1228135879}
   - {fileID: 2003169937}
+<<<<<<< HEAD
+=======
+  - {fileID: 2147201001}
+>>>>>>> dc43c262ffe1e7d298c0f77c277402d8f4102409
