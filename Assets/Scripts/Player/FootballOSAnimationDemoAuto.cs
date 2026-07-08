@@ -16,18 +16,23 @@ public class FootballOSAnimationDemoAuto : MonoBehaviour
     [SerializeField] private bool loopDemo = false;
 
     [Header("Posicion del balon")]
-    [SerializeField] private float ballForwardOffset = 1.1f;
-    [SerializeField] private float ballHeight = 0.35f;
+    [SerializeField] private float ballForwardOffset = 1.2f;
+    [SerializeField] private float ballHeight = 0.16f;
 
-    [Header("Fuerza del balon")]
-    [SerializeField] private float passForce = 3.5f;
-    [SerializeField] private float shootForce = 8f;
-    [SerializeField] private float passLiftForce = 0.2f;
-    [SerializeField] private float shootLiftForce = 0.8f;
+    [Header("Disparo")]
+    [SerializeField] private float kickDelay = 0.55f;
+    [SerializeField] private float shootForce = 3.5f;
+    [SerializeField] private float shootLiftForce = 0.05f;
+
+    [Header("Control del balon en la demo")]
+    [SerializeField] private float stopBallAfterSeconds = 1.4f;
+    [SerializeField] private float visibleBallDistance = 5f;
 
     private Animator playerAnimator;
     private Transform playerTransform;
     private Rigidbody ballRb;
+    private Collider ballCollider;
+    private CharacterController playerController;
 
     private void Start()
     {
@@ -50,19 +55,24 @@ public class FootballOSAnimationDemoAuto : MonoBehaviour
             {
                 playerAnimator = player.GetComponentInChildren<Animator>();
                 playerTransform = player.transform;
+                playerController = player.GetComponent<CharacterController>();
             }
 
             if (ball != null)
             {
                 ballRb = ball.GetComponent<Rigidbody>();
+                ballCollider = ball.GetComponent<Collider>();
             }
 
             yield return null;
         }
 
-        Debug.Log("FOOTBALL OS: Jugador y balon encontrados");
+        if (playerController != null && ballCollider != null)
+        {
+            Physics.IgnoreCollision(playerController, ballCollider, true);
+        }
 
-        PrepareBallInFrontOfPlayer();
+        Debug.Log("FOOTBALL OS: Jugador y balon encontrados");
 
         if (playDemoOnStart)
         {
@@ -81,25 +91,17 @@ public class FootballOSAnimationDemoAuto : MonoBehaviour
             Debug.Log("FOOTBALL OS: Receive");
             PrepareBallInFrontOfPlayer();
             playerAnimator.SetTrigger("Receive");
-            yield return new WaitForSeconds(2f);
-
-            Debug.Log("FOOTBALL OS: Pass");
-            PrepareBallInFrontOfPlayer();
-            playerAnimator.SetTrigger("Pass");
-
-            yield return new WaitForSeconds(0.6f);
-            KickBall(passForce, passLiftForce);
-
-            yield return new WaitForSeconds(2f);
+            yield return new WaitForSeconds(1.5f);
 
             Debug.Log("FOOTBALL OS: Shoot");
             PrepareBallInFrontOfPlayer();
             playerAnimator.SetTrigger("Shoot");
 
-            yield return new WaitForSeconds(0.7f);
-            KickBall(shootForce, shootLiftForce);
+            yield return new WaitForSeconds(kickDelay);
 
-            yield return new WaitForSeconds(2f);
+            KickBall();
+
+            yield return new WaitForSeconds(2.2f);
 
             Debug.Log("FOOTBALL OS: Celebrate");
             playerAnimator.SetTrigger("Celebrate");
@@ -113,6 +115,9 @@ public class FootballOSAnimationDemoAuto : MonoBehaviour
     {
         if (ballRb == null || playerTransform == null) return;
 
+        ballRb.isKinematic = true;
+        ballRb.useGravity = false;
+
         ballRb.linearVelocity = Vector3.zero;
         ballRb.angularVelocity = Vector3.zero;
 
@@ -124,18 +129,43 @@ public class FootballOSAnimationDemoAuto : MonoBehaviour
         ballRb.rotation = Quaternion.identity;
     }
 
-    private void KickBall(float force, float lift)
+    private void KickBall()
     {
         if (ballRb == null || playerTransform == null) return;
+
+        ballRb.isKinematic = false;
+        ballRb.useGravity = true;
 
         ballRb.linearVelocity = Vector3.zero;
         ballRb.angularVelocity = Vector3.zero;
 
         Vector3 direction = playerTransform.forward;
-        direction.y += lift;
+        direction.y += shootLiftForce;
 
-        ballRb.AddForce(direction.normalized * force, ForceMode.Impulse);
+        ballRb.AddForce(direction.normalized * shootForce, ForceMode.Impulse);
 
-        Debug.Log("FOOTBALL OS: Balon impulsado");
+        Debug.Log("FOOTBALL OS: Balon disparado");
+
+        StartCoroutine(StopBallForDemo());
+    }
+
+    private IEnumerator StopBallForDemo()
+    {
+        yield return new WaitForSeconds(stopBallAfterSeconds);
+
+        if (ballRb == null || playerTransform == null) yield break;
+
+        ballRb.linearVelocity = Vector3.zero;
+        ballRb.angularVelocity = Vector3.zero;
+
+        Vector3 visiblePosition = playerTransform.position
+                                  + playerTransform.forward * visibleBallDistance
+                                  + Vector3.up * ballHeight;
+
+        ballRb.position = visiblePosition;
+        ballRb.isKinematic = true;
+        ballRb.useGravity = false;
+
+        Debug.Log("FOOTBALL OS: Balon detenido para la demo");
     }
 }
