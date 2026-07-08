@@ -29,7 +29,6 @@ public class FootballOSAnimationDemoAuto : MonoBehaviour
     [SerializeField] private bool playOnStart = true;
     [SerializeField] private bool loopDemo = false;
 
-<<<<<<< HEAD
     private Transform midfielder;
     private Transform leftPlayer;
     private Transform forward;
@@ -39,16 +38,6 @@ public class FootballOSAnimationDemoAuto : MonoBehaviour
     private Transform defender2;
     private Transform defender3;
     private Transform goalkeeper;
-=======
-    [Header("Posicion del balon")]
-    [SerializeField] private float ballForwardOffset = 1.2f;
-    [SerializeField] private float ballHeight = 0.25f;
-
-    [Header("Disparo")]
-    [SerializeField] private float kickDelay = 0.55f;
-    [SerializeField] private float shootForce = 0.5f;
-    [SerializeField] private float shootLiftForce = 0.05f;
->>>>>>> dc43c262ffe1e7d298c0f77c277402d8f4102409
 
     private Animator midfielderAnim;
     private Animator leftAnim;

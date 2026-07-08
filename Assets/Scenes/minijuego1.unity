@@ -1223,16 +1223,6 @@ MonoBehaviour:
   passArcHeight: 1.2
   playOnStart: 1
   loopDemo: 0
-<<<<<<< HEAD
-=======
-  ballForwardOffset: 1.2
-  ballHeight: 0.25
-  kickDelay: 0.55
-  shootForce: 0.5
-  shootLiftForce: 0.05
-  stopBallAfterSeconds: 1.4
-  visibleBallDistance: 5
->>>>>>> dc43c262ffe1e7d298c0f77c277402d8f4102409
 --- !u!4 &1779460904
 Transform:
   m_ObjectHideFlags: 0
@@ -1459,10 +1449,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-<<<<<<< HEAD
---- !u!1001 &1884084837
-PrefabInstance:
-=======
 --- !u!114 &1865814590
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1482,9 +1468,8 @@ MonoBehaviour:
   staticFriction: 0
   linearDamping: 0
   angularDamping: 0.05
---- !u!1 &1868869436
-GameObject:
->>>>>>> dc43c262ffe1e7d298c0f77c277402d8f4102409
+--- !u!1001 &1884084837
+PrefabInstance:
   m_ObjectHideFlags: 0
   serializedVersion: 2
   m_Modification:
@@ -1937,8 +1922,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-<<<<<<< HEAD
-=======
 --- !u!1 &2147201000
 GameObject:
   m_ObjectHideFlags: 0
@@ -1991,7 +1974,6 @@ MonoBehaviour:
   wallMaterial: {fileID: 0}
   wallBounciness: 0.5
   gizmoColor: {r: 0.2, g: 0.7, b: 1, a: 0.35}
->>>>>>> dc43c262ffe1e7d298c0f77c277402d8f4102409
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
@@ -2006,7 +1988,4 @@ SceneRoots:
   - {fileID: 1865814589}
   - {fileID: 1228135879}
   - {fileID: 2003169937}
-<<<<<<< HEAD
-=======
   - {fileID: 2147201001}
->>>>>>> dc43c262ffe1e7d298c0f77c277402d8f4102409
