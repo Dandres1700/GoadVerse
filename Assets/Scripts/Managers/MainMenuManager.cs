@@ -117,7 +117,10 @@ public class MainMenuManager : MonoBehaviour
     {
         if (!IsUsableFile(videoPath))
         {
-            Debug.LogWarning("No se encontro un video de instrucciones valido en Assets/Historia.");
+            yield return ShowHistoriaWarningAndWait(
+                "No se encontro un video de instrucciones valido. Entrando a la historia...",
+                1.5f
+            );
             yield break;
         }
 
@@ -160,13 +163,27 @@ public class MainMenuManager : MonoBehaviour
 
         if (!historiaVideoPlayer.isPrepared || failed)
         {
+            yield return ShowHistoriaWarningAndWait(
+                "No se pudo preparar el video de instrucciones. Continuando...",
+                1.5f
+            );
             yield break;
         }
 
         historiaVideoPlayer.Play();
 
-        while (!finished && !failed)
+        float playbackTimer = 0f;
+        float maxPlaybackSeconds = GetVideoTimeoutSeconds(historiaVideoPlayer, 20f);
+
+        while (!finished && !failed && playbackTimer < maxPlaybackSeconds)
         {
+            playbackTimer += Time.unscaledDeltaTime;
+
+            if (!historiaVideoPlayer.isPlaying && historiaVideoPlayer.time > 0.1f)
+            {
+                break;
+            }
+
             yield return null;
         }
 
@@ -184,15 +201,19 @@ public class MainMenuManager : MonoBehaviour
 
         if (!IsUsableFile(videoPath))
         {
-            Debug.LogWarning("No se encontro un video Historia valido en Assets/Historia.");
-            yield return new WaitForSecondsRealtime(Mathf.Max(0.1f, fallbackSeconds));
+            yield return ShowHistoriaWarningAndWait(
+                "No se encontro el video de historia. Entrando al lobby...",
+                fallbackSeconds
+            );
             yield break;
         }
 
         if (!IsUsableFile(audioPath))
         {
-            Debug.LogWarning("No se encontro un audio Historia_narrada valido en Assets/Historia.");
-            yield return new WaitForSecondsRealtime(Mathf.Max(0.1f, fallbackSeconds));
+            yield return ShowHistoriaWarningAndWait(
+                "No se encontro el audio de historia. Entrando al lobby...",
+                fallbackSeconds
+            );
             yield break;
         }
 
@@ -233,6 +254,10 @@ public class MainMenuManager : MonoBehaviour
 
         if (!historiaVideoPlayer.isPrepared || videoFailed)
         {
+            yield return ShowHistoriaWarningAndWait(
+                "No se pudo preparar el video de historia. Entrando al lobby...",
+                fallbackSeconds
+            );
             yield break;
         }
 
@@ -243,7 +268,10 @@ public class MainMenuManager : MonoBehaviour
             if (request.result != UnityWebRequest.Result.Success)
             {
                 Debug.LogWarning("No se pudo cargar Historia_narrada: " + request.error);
-                yield return new WaitForSecondsRealtime(Mathf.Max(0.1f, fallbackSeconds));
+                yield return ShowHistoriaWarningAndWait(
+                    "No se pudo cargar la narracion. Entrando al lobby...",
+                    fallbackSeconds
+                );
                 yield break;
             }
 
@@ -251,7 +279,10 @@ public class MainMenuManager : MonoBehaviour
 
             if (clip == null)
             {
-                yield return new WaitForSecondsRealtime(Mathf.Max(0.1f, fallbackSeconds));
+                yield return ShowHistoriaWarningAndWait(
+                    "La narracion no esta disponible. Entrando al lobby...",
+                    fallbackSeconds
+                );
                 yield break;
             }
 
@@ -259,8 +290,25 @@ public class MainMenuManager : MonoBehaviour
             historiaVideoPlayer.Play();
             historiaAudioSource.Play();
 
-            while ((!videoFinished && !videoFailed) || (historiaAudioSource != null && historiaAudioSource.isPlaying))
+            float playbackTimer = 0f;
+            float maxPlaybackSeconds = Mathf.Max(
+                GetVideoTimeoutSeconds(historiaVideoPlayer, fallbackSeconds),
+                clip.length + 5f
+            );
+
+            while (((!videoFinished && !videoFailed) || (historiaAudioSource != null && historiaAudioSource.isPlaying))
+                && playbackTimer < maxPlaybackSeconds)
             {
+                playbackTimer += Time.unscaledDeltaTime;
+
+                bool videoStopped = !historiaVideoPlayer.isPlaying && historiaVideoPlayer.time > 0.1f;
+                bool audioStopped = historiaAudioSource == null || !historiaAudioSource.isPlaying;
+
+                if (videoStopped && audioStopped)
+                {
+                    break;
+                }
+
                 yield return null;
             }
         }
@@ -311,6 +359,18 @@ public class MainMenuManager : MonoBehaviour
 
         historiaDisplay = null;
         historiaStatusText = null;
+    }
+
+    private IEnumerator ShowHistoriaWarningAndWait(string message, float seconds)
+    {
+        Debug.LogWarning(message);
+
+        if (historiaStatusText != null)
+        {
+            historiaStatusText.text = message;
+        }
+
+        yield return new WaitForSecondsRealtime(Mathf.Max(0.1f, seconds));
     }
 
     private void StopOtherSceneAudio()
@@ -397,6 +457,26 @@ public class MainMenuManager : MonoBehaviour
         RenderTexture renderTexture = new RenderTexture(1920, 1080, 0);
         renderTexture.Create();
         return renderTexture;
+    }
+
+    private static float GetVideoTimeoutSeconds(VideoPlayer videoPlayer, float fallbackSeconds)
+    {
+        if (videoPlayer == null)
+        {
+            return Mathf.Max(5f, fallbackSeconds);
+        }
+
+        if (videoPlayer.length > 0.1)
+        {
+            return (float)videoPlayer.length + 5f;
+        }
+
+        if (videoPlayer.frameCount > 0 && videoPlayer.frameRate > 0.1)
+        {
+            return (float)(videoPlayer.frameCount / videoPlayer.frameRate) + 5f;
+        }
+
+        return Mathf.Max(5f, fallbackSeconds);
     }
 
     private static AudioType GetAudioType(string audioPath)

@@ -187,6 +187,19 @@ Para preparar el `.exe`:
 3. Si se quiere sincronizar manualmente antes de construir, usar
    `GoadVerse -> Sync Historia Streaming Assets`.
 
+Para distribuir el juego en otra computadora:
+
+1. No enviar solo `GoadVerse.exe`. Unity necesita el ejecutable y tambien la
+   carpeta `GoadVerse_Data`.
+2. Comprimir y enviar la carpeta completa generada por Unity, por ejemplo:
+   `GoadVerse.exe`, `GoadVerse_Data`, `UnityPlayer.dll` y demas archivos del
+   build.
+3. Confirmar que dentro de la carpeta del build exista:
+   `GoadVerse_Data/StreamingAssets/Historia`.
+4. Dentro de esa carpeta deben estar `Instrucciones.mp4`, `Historia.mp4` y
+   `Historia_narrada.mp3`. Si falta esa carpeta, los videos no se veran en otra
+   computadora.
+
 ## Convenciones de trabajo
 
 - Guardar escenas antes de subir cambios.
@@ -200,6 +213,8 @@ Para preparar el `.exe`:
   fondo debe quedar detras del modelo 3D.
 - Antes de distribuir un `.exe`, confirmar que los videos de historia se
   copiaron a `StreamingAssets/Historia`.
+- Para compartir el juego, enviar la carpeta completa del build o un `.zip` de
+  esa carpeta. Enviar solo el `.exe` no incluye escenas, datos ni videos.
 - En escenas serializadas de Unity, limpiar cualquier conflicto de merge antes
   de abrir Play Mode.
 
