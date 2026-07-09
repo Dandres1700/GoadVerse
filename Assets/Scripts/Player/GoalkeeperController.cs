@@ -181,8 +181,12 @@ public class GoalkeeperController : MonoBehaviour
 
         if (ballRigidbody != null)
         {
-            ballRigidbody.linearVelocity = Vector3.zero;
-            ballRigidbody.angularVelocity = Vector3.zero;
+            if (!ballRigidbody.isKinematic)
+            {
+                ballRigidbody.linearVelocity = Vector3.zero;
+                ballRigidbody.angularVelocity = Vector3.zero;
+            }
+
             ballRigidbody.useGravity = false;
             ballRigidbody.isKinematic = true;
         }

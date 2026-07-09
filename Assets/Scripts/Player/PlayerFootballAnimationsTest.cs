@@ -77,6 +77,8 @@ public class PlayerFootballAnimationsTest : MonoBehaviour
 
         if (ballRigidbody == null) return;
 
+        ballRigidbody.isKinematic = false;
+        ballRigidbody.useGravity = true;
         ballRigidbody.linearVelocity = Vector3.zero;
         ballRigidbody.angularVelocity = Vector3.zero;
 

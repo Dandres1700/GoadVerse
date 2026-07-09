@@ -4815,22 +4815,56 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1779460902}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 9941332921668c14dbaf5af45d6e9d2e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::FootballOSFullMatchController
   canchaSceneName: minijuego1
   ballName: Ball
-  ballHeight: 0.43
-  ballOffset: 1.25
+  ballHeight: 0.75
+  ballOffset: 1.45
   passArcHeight: 0.45
   centerX: -4
   playerGoalZ: -14
   rivalGoalZ: 15
+  playAreaCenter: {x: -6.88477, y: 0, z: -14.53401}
+  playAreaSize: {x: 105, y: 68}
+  playAreaPadding: 1.5
+  playerGoalX: -60
+  rivalGoalX: 46
+  goalCenterZ: -14.4
+  goalWidth: 14
+  goalResetDelay: 1.25
   supportMoveSpeed: 2.8
   carrySpeed: 0.7
   playerGroundY: 0.4
+  enableManualPlayerTeamControl: 1
+  manualUseOnlyActiveScenePlayers: 1
+  manualPreserveScenePositions: 1
+  playerTeamRootName: Team_Player
+  rivalTeamRootName: Team_Rival
+  manualPlayerIndex: 9
+  switchManualPlayerKey: 101
+  manualKickKey: 111
+  manualWalkSpeed: 5
+  manualRunSpeed: 8
+  manualTurnSpeed: 12
+  manualKickForce: 8
+  manualKickLift: 0.12
+  manualKickDelay: 0.15
+  manualKickReleaseSeconds: 0.8
+  manualPickupDistance: 2.5
+  manualPassDuration: 0.45
+  manualPassMaxDistance: 45
+  manualShootDistance: 14
+  manualSupportForwardSpacing: 8
+  manualSupportSideSpacing: 8
+  manualRivalPressureSpeed: 3.4
+  manualRivalStealDistance: 1.5
+  manualRecoverDistance: 1.8
+  manualStealCooldownSeconds: 1
+  manualPlayerKeepsBall: 1
   defensivePressureDistance: 2.2
   defensiveMarkingBlend: 0.45
   passLaneRiskPenalty: 5
@@ -5223,7 +5257,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   forceHalfScale: 1
-  halfScale: {x: 0.85, y: 0.85, z: 0.85}
+  halfScale: {x: 1.5, y: 1.5, z: 1.5}
   bounceForce: 0.5
   dynamicFriction: 0
   staticFriction: 0
@@ -6847,10 +6881,16 @@ MonoBehaviour:
   center: {x: -6.88477, y: 0, z: -14.53401}
   playAreaSize: {x: 105, y: 68}
   floorY: 0
+  fitToRendererOnAwake: 1
+  boundsRendererObjectName: st081_pitch_0
+  boundsPadding: {x: 0, y: 0}
   wallHeight: 12
   wallThickness: 2
   wallMaterial: {fileID: 0}
   wallBounciness: 0.5
+  openGoalMouthsOnEastWest: 1
+  goalCenterZ: -14.4
+  goalOpeningWidth: 14
   gizmoColor: {r: 0.2, g: 0.7, b: 1, a: 0.35}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
