@@ -28,6 +28,9 @@ public class FootballOSFullMatchController : MonoBehaviour
     [SerializeField] private float ballHeight = 0.75f;
     [SerializeField] private float ballOffset = 1.45f;
     [SerializeField] private float passArcHeight = 0.45f;
+    [SerializeField] private bool useFixedInitialBallTransform = true;
+    [SerializeField] private Vector3 initialBallPosition = new Vector3(-7.2f, 0.43f, -15.2f);
+    [SerializeField] private Vector3 initialBallScale = new Vector3(2f, 2f, 2f);
 
     [Header("Campo")]
     [SerializeField] private float centerX = -4f;
@@ -77,6 +80,7 @@ public class FootballOSFullMatchController : MonoBehaviour
     [SerializeField] private float manualRivalPassDuration = 0.55f;
     [SerializeField] private float manualRivalShootDistance = 12f;
     [SerializeField] private bool manualPlayerKeepsBall = true;
+    [SerializeField] private bool attachBallToManualPlayerOnStart = false;
 
     [Header("Panel de gol")]
     [SerializeField] private bool showGoalPanel = true;
@@ -226,7 +230,7 @@ private void Update()
             manualRivalHasBall = false;
             manualRivalOwnerIndex = -1;
             manualStealCooldown = manualStealCooldownSeconds;
-            SelectManualPlayer(manualPlayerIndex);
+            SelectManualPlayer(manualPlayerIndex, attachBallToManualPlayerOnStart);
         }
         else if (!enableManualPlayerTeamControl)
         {
@@ -474,6 +478,8 @@ private void Update()
 
     private void PrepareBall()
 {
+    PlaceBallAtInitialTransform();
+
     if (ballRb == null) return;
 
     ballRb.isKinematic = false;
@@ -482,6 +488,15 @@ private void Update()
     ballRb.angularVelocity = Vector3.zero;
 
     ballRb.isKinematic = true;
+}
+
+    private void PlaceBallAtInitialTransform()
+{
+    if (!useFixedInitialBallTransform || ball == null) return;
+
+    ball.position = initialBallPosition;
+    ball.rotation = Quaternion.identity;
+    ball.localScale = initialBallScale;
 }
 
     private IEnumerator MatchLoop()
@@ -1368,7 +1383,7 @@ private void Update()
         return Vector2.ClampMagnitude(new Vector2(horizontal, vertical), 1f);
     }
 
-    private void SelectManualPlayer(int index)
+    private void SelectManualPlayer(int index, bool attachBallToSelected = true)
     {
         int selectableIndex = GetSelectableManualPlayerIndex(index);
 
@@ -1392,7 +1407,7 @@ private void Update()
         manualPlayerIndex = selectableIndex;
         ownerIndex = manualRivalHasBall ? manualRivalOwnerIndex : manualPlayerIndex;
         playerPossession = !manualRivalHasBall;
-        manualBallAttached = !manualRivalHasBall && manualPlayerKeepsBall;
+        manualBallAttached = !manualRivalHasBall && manualPlayerKeepsBall && attachBallToSelected;
         manualBallReleaseTimer = 0f;
 
         for (int i = 0; i < playerBusy.Length; i++)
@@ -2047,12 +2062,12 @@ private IEnumerator ManualGoalReset(bool playerScored)
     yield return new WaitForSeconds(Mathf.Max(goalResetDelay, goalPanelSeconds));
 
     ResetManualMatchPositions();
-    manualBallAttached = true;
+    manualBallAttached = false;
     manualBallReleaseTimer = 0f;
     manualStealCooldown = manualStealCooldownSeconds;
     manualRivalDecisionTimer = manualRivalDecisionInterval;
 
-    SelectManualPlayer(manualPlayerIndex);
+    SelectManualPlayer(manualPlayerIndex, false);
 
     HideGoalPanel();
     manualGoalResetRoutine = null;
@@ -2095,6 +2110,8 @@ private void ResetManualMatchPositions()
     manualRivalHasBall = false;
     manualRivalOwnerIndex = -1;
     manualRivalDecisionTimer = manualRivalDecisionInterval;
+    manualBallAttached = false;
+    PlaceBallAtInitialTransform();
 
     if (manualRivalActionRoutine != null)
     {
@@ -2307,7 +2324,7 @@ private void ResetManualMatchPositions()
         if (uiController == null) return;
 
         uiController.SetEventLog(
-            "TIME: " + minute.ToString("00") + "'  SCORE: ECU " + ecuadorScore + " - " + cpuScore + " CPU\n" +
+            "TIEMPO: " + minute.ToString("00") + "'  MARCADOR: Team Player " + ecuadorScore + " - " + cpuScore + " Team Rival\n" +
             eventLog
         );
 

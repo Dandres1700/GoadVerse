@@ -557,7 +557,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Global Tactical Simulation
+  m_text: Controles, acciones y marcador
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -1860,7 +1860,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "- Esperando simulaci\xF3n..."
+  m_text: "MARCADOR: Team Player 0 - 0 Team Rival\r\n- Esperando inicio del partido..."
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -2061,7 +2061,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
   m_AnchoredPosition: {x: 175, y: -95.3}
-  m_SizeDelta: {x: 340, y: 58}
+  m_SizeDelta: {x: 340, y: 78}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &795158283
 MonoBehaviour:
@@ -2083,8 +2083,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "Portal conectado...\r\nEstadio cargado...\r\nEquipo sincronizado...\r\nSimulaci\xF3n
-    t\xE1ctica activa."
+  m_text: "MOVIMIENTO: WASD / Flechas\r\nCAMBIAR JUGADOR: E / Tab\r\nPATEAR / PASAR: O\r\nCORRER: Shift"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -2698,7 +2697,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
   m_AnchoredPosition: {x: 175, y: -255}
-  m_SizeDelta: {x: 340, y: 42}
+  m_SizeDelta: {x: 340, y: 72}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &939044962
 MonoBehaviour:
@@ -2720,9 +2719,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 'PLAYER IN CONTROL: NONE
-
-    NEXT ACTION: WAITING'
+  m_text: "JUGADOR: Ninguno\r\nACCION: Esperando\r\nO: patea cerca del arco, pasa si hay companero"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -4825,6 +4822,9 @@ MonoBehaviour:
   ballHeight: 0.75
   ballOffset: 1.45
   passArcHeight: 0.45
+  useFixedInitialBallTransform: 1
+  initialBallPosition: {x: -7.2, y: 0.43, z: -15.2}
+  initialBallScale: {x: 2, y: 2, z: 2}
   centerX: -4
   playerGoalZ: -14
   rivalGoalZ: 15
@@ -4868,6 +4868,7 @@ MonoBehaviour:
   manualRivalPassDuration: 0.55
   manualRivalShootDistance: 12
   manualPlayerKeepsBall: 1
+  attachBallToManualPlayerOnStart: 0
   showGoalPanel: 1
   goalPanelSeconds: 2
   playerGoalPanelColor: {r: 0.05, g: 0.85, b: 1, a: 0.82}
@@ -5245,8 +5246,8 @@ Transform:
   m_GameObject: {fileID: 1865814584}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0.23395, y: 0.43, z: 0.9425}
-  m_LocalScale: {x: 2.5, y: 2.5, z: 2.5}
+  m_LocalPosition: {x: -7.2, y: 0.43, z: -15.2}
+  m_LocalScale: {x: 2, y: 2, z: 2}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
@@ -5264,7 +5265,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   forceHalfScale: 1
-  halfScale: {x: 1.5, y: 1.5, z: 1.5}
+  halfScale: {x: 2, y: 2, z: 2}
   bounceForce: 0.5
   dynamicFriction: 0
   staticFriction: 0

@@ -21,22 +21,25 @@ public class FootballOSUIController : MonoBehaviour
             titleText.text = "FOOTBALL OS";
 
         if (subtitleText != null)
-            subtitleText.text = "Tactical Simulation Interface";
+            subtitleText.text = "Controles, acciones y marcador";
 
         if (statusText != null)
             statusText.text =
-                "STATUS: CONNECTED\n" +
-                "MODE: AUTO PLAY SIMULATION\n" +
-                "MATCH: ECUADOR vs RIVAL\n" +
-                "ENGINE: ACTIVE";
+                "MOVIMIENTO: WASD / Flechas\n" +
+                "CAMBIAR JUGADOR: E / Tab\n" +
+                "PATEAR / PASAR: O\n" +
+                "CORRER: Shift";
 
         if (eventLogText != null)
-            eventLogText.text = "- Esperando simulación...";
+            eventLogText.text =
+                "MARCADOR: Team Player 0 - 0 Team Rival\n" +
+                "- Esperando inicio del partido...";
 
         if (controlText != null)
             controlText.text =
-                "PLAYER IN CONTROL: NONE\n" +
-                "NEXT ACTION: WAITING";
+                "JUGADOR: Ninguno\n" +
+                "ACCION: Esperando\n" +
+                "O: patea cerca del arco, pasa si hay companero";
     }
 
     public void SetEventLog(string text)
@@ -50,8 +53,9 @@ public class FootballOSUIController : MonoBehaviour
         if (controlText != null)
         {
             controlText.text =
-                "PLAYER IN CONTROL: " + playerInControl + "\n" +
-                "NEXT ACTION: " + nextAction;
+                "JUGADOR: " + playerInControl + "\n" +
+                "ACCION: " + nextAction + "\n" +
+                "WASD mueve | E cambia | O patea/pasa";
         }
     }
 }

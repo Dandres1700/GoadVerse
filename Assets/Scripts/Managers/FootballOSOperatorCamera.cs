@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
 
 [DefaultExecutionOrder(10000)]
@@ -56,6 +57,11 @@ public class FootballOSOperatorCamera : MonoBehaviour
 
     private void HandleCameraInput()
     {
+        if (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject())
+        {
+            return;
+        }
+
         if (Input.GetMouseButton(1))
         {
             yaw += Input.GetAxis("Mouse X") * rotateSpeed * Time.unscaledDeltaTime;

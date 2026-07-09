@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.EventSystems;
 #if ENABLE_INPUT_SYSTEM
 using UnityEngine.InputSystem;
 #endif
@@ -33,7 +34,7 @@ public class ThirdPersonCamera : MonoBehaviour
     private void Start()
     {
         ClampZoomDistance();
-        LockCursor(true);
+        LockCursor(false);
     }
 
     private void LateUpdate()
@@ -41,11 +42,13 @@ public class ThirdPersonCamera : MonoBehaviour
         if (target == null) return;
         if (target == transform) return;
 
+        bool pointerOverUI = IsPointerOverUI();
+
         if (Input.GetKeyDown(KeyCode.Escape))
         {
             LockCursor(false);
         }
-        else if (Input.GetMouseButtonDown(0))
+        else if (Input.GetMouseButtonDown(0) && !pointerOverUI)
         {
             LockCursor(true);
         }
@@ -96,6 +99,8 @@ public class ThirdPersonCamera : MonoBehaviour
 
     private void HandleZoom()
     {
+        if (IsPointerOverUI()) return;
+
         float scroll = Input.GetAxis("Mouse ScrollWheel");
 
         if (Mathf.Abs(scroll) <= 0.001f) return;
@@ -122,5 +127,10 @@ public class ThirdPersonCamera : MonoBehaviour
     {
         Cursor.lockState = locked ? CursorLockMode.Locked : CursorLockMode.None;
         Cursor.visible = !locked;
+    }
+
+    private static bool IsPointerOverUI()
+    {
+        return EventSystem.current != null && EventSystem.current.IsPointerOverGameObject();
     }
 }

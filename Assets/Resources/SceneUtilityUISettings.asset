@@ -1,0 +1,54 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e2ca2cfda7aa4c838abd8d22d9bc180f, type: 3}
+  m_Name: SceneUtilityUISettings
+  m_EditorClassIdentifier:
+  runtimeCanvasSortingOrder: 1000
+  topRightButtonSize: {x: 170, y: 58}
+  minigamePauseButtonPosition: {x: -210, y: -24}
+  minigameSettingsButtonPosition: {x: -24, y: -24}
+  lobbyExitButtonPosition: {x: -24, y: -24}
+  mainMenuPanelPosition: {x: 0, y: 0}
+  mainMenuPanelSize: {x: 760, y: 660}
+  mainMenuTextPosition: {x: 0, y: 65}
+  mainMenuTextSize: {x: 660, y: 470}
+  mainMenuCloseButtonPosition: {x: 0, y: -265}
+  mainMenuCloseButtonSize: {x: 300, y: 76}
+  minigamePanelPosition: {x: 0, y: 0}
+  minigamePanelSize: {x: 760, y: 680}
+  minigameTextPosition: {x: 0, y: 80}
+  minigameTextSize: {x: 660, y: 470}
+  minigameExitLobbyButtonPosition: {x: -175, y: -270}
+  minigameExitLobbyButtonSize: {x: 320, y: 72}
+  minigameCloseButtonPosition: {x: 175, y: -270}
+  minigameCloseButtonSize: {x: 250, y: 72}
+  mainMenuSettingsText: "MENU DE CONFIGURACIONES\n\nMovimiento del personaje\nWASD / Flechas: mover\nShift: correr\nMouse: mover camara\n\nPortal del lobby\nAcercate al portal y presiona E para entrar.\n\nMinijuego de futbol\nWASD / Flechas: mover jugador\nE / Tab: cambiar jugador\nO: patear o pasar el balon\nBoton PAUSA: detener o reanudar el juego"
+  minigameControlsText: "CONTROLES\n\nLobby\nWASD / Flechas: mover personaje\nShift: correr\nMouse: mover camara\nPortal: acercate y presiona E\n\nMinijuego\nWASD / Flechas: mover jugador\nE / Tab: cambiar jugador\nO: patear o pasar el balon\nPAUSA: detener o reanudar el partido"
+  pauseButtonLabel: PAUSA
+  resumeButtonLabel: RESUMIR
+  settingsButtonLabel: SETTINGS
+  closeButtonLabel: CERRAR
+  lobbyExitButtonLabel: SALIR
+  exitToLobbyButtonLabel: SALIR AL LOBBY
+  overlayColor: {r: 0, g: 0.023529412, b: 0.05490196, a: 0.7372549}
+  panelColor: {r: 0.023529412, g: 0.0627451, b: 0.10980392, a: 0.9411765}
+  buttonColor: {r: 0.02745098, g: 0.16470589, b: 0.22745098, a: 0.9607843}
+  textColor: {r: 1, g: 1, b: 1, a: 1}
+  panelTextFontSize: 30
+  buttonTextFontSize: 26
+  minFontSize: 16
+  historiaFolderName: Historia
+  instructionsVideoName: Instrucciones
+  historiaVideoName: Historia
+  historiaAudioName: Historia_narrada
+  historiaFallbackSeconds: 4
+  historiaBackgroundColor: {r: 0, g: 0, b: 0, a: 1}
