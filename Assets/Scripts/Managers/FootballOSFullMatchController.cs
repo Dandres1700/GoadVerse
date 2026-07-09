@@ -1,6 +1,8 @@
 using System.Collections;
+using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 public class FootballOSFullMatchController : MonoBehaviour
 {
@@ -71,7 +73,16 @@ public class FootballOSFullMatchController : MonoBehaviour
     [SerializeField] private float manualRivalStealDistance = 1.5f;
     [SerializeField] private float manualRecoverDistance = 1.8f;
     [SerializeField] private float manualStealCooldownSeconds = 1f;
+    [SerializeField] private float manualRivalDecisionInterval = 1.4f;
+    [SerializeField] private float manualRivalPassDuration = 0.55f;
+    [SerializeField] private float manualRivalShootDistance = 12f;
     [SerializeField] private bool manualPlayerKeepsBall = true;
+
+    [Header("Panel de gol")]
+    [SerializeField] private bool showGoalPanel = true;
+    [SerializeField] private float goalPanelSeconds = 2f;
+    [SerializeField] private Color playerGoalPanelColor = new Color(0.05f, 0.85f, 1f, 0.82f);
+    [SerializeField] private Color rivalGoalPanelColor = new Color(1f, 0.12f, 0.08f, 0.82f);
 
     [Header("CPU / IA")]
     [SerializeField] private float defensivePressureDistance = 2.2f;
@@ -112,6 +123,8 @@ public class FootballOSFullMatchController : MonoBehaviour
 
     private Vector3[] playerBase = new Vector3[11];
     private Vector3[] rivalBase = new Vector3[11];
+    private Quaternion[] playerBaseRotation = new Quaternion[11];
+    private Quaternion[] rivalBaseRotation = new Quaternion[11];
 
     private Transform ball;
     private Rigidbody ballRb;
@@ -129,7 +142,13 @@ public class FootballOSFullMatchController : MonoBehaviour
     private bool manualRivalHasBall;
     private int manualRivalOwnerIndex = -1;
     private float manualStealCooldown;
+    private float manualRivalDecisionTimer;
     private Coroutine manualGoalResetRoutine;
+    private Coroutine manualRivalActionRoutine;
+    private GameObject goalPanelObject;
+    private Image goalPanelImage;
+    private TMP_Text goalPanelText;
+    private CanvasGroup goalPanelGroup;
 
     private int ecuadorScore;
     private int cpuScore;
@@ -157,6 +176,11 @@ private void Update()
     DisableManualPlayer();
 
     if (!ready) return;
+
+    if (manualGoalResetRoutine != null)
+    {
+        return;
+    }
 
     if (enableManualPlayerTeamControl)
     {
@@ -186,8 +210,11 @@ private void Update()
             yield return null;
         }
 
-        uiController = FindFirstObjectByType<FootballOSUIController>();
-        commandOverlay = FindFirstObjectByType<FootballOSCommandOverlay>();
+        uiController = FindAnyObjectByType<FootballOSUIController>();
+        commandOverlay = FindAnyObjectByType<FootballOSCommandOverlay>();
+        EnsureGoalPanel();
+
+        yield return WaitForIntroCamera();
 
         PrepareBall();
 
@@ -254,6 +281,22 @@ private void Update()
         return enableManualPlayerTeamControl && manualUseOnlyActiveScenePlayers && manualPreserveScenePositions;
     }
 
+    private IEnumerator WaitForIntroCamera()
+    {
+        MundialSystemCameraController cameraController = FindAnyObjectByType<MundialSystemCameraController>();
+
+        while (cameraController != null && !cameraController.IsIntroComplete)
+        {
+            UpdateUI(
+                "- Presentacion de cancha y equipos\n- El partido inicia al terminar la camara",
+                "FOOTBALL OS",
+                "Intro"
+            );
+
+            yield return null;
+        }
+    }
+
     private void FindPlayer(string objectName, ref Transform player, ref Animator animator)
     {
         if (player != null) return;
@@ -311,6 +354,7 @@ private void Update()
             if (playerTeam[i] != null)
             {
                 playerBase[i] = playerTeam[i].position;
+                playerBaseRotation[i] = playerTeam[i].rotation;
                 SetSpeed(playerAnimators[i], 0f);
             }
 
@@ -322,6 +366,7 @@ private void Update()
             if (rivalTeam[i] != null)
             {
                 rivalBase[i] = rivalTeam[i].position;
+                rivalBaseRotation[i] = rivalTeam[i].rotation;
                 SetSpeed(rivalAnimators[i], 0f);
             }
 
@@ -1080,6 +1125,12 @@ private void Update()
 
         if (manualRivalHasBall && IsBallCloseTo(player, manualRecoverDistance))
         {
+            if (manualRivalActionRoutine != null)
+            {
+                StopCoroutine(manualRivalActionRoutine);
+                manualRivalActionRoutine = null;
+            }
+
             manualRivalHasBall = false;
             manualRivalOwnerIndex = -1;
             manualBallAttached = true;
@@ -1538,12 +1589,38 @@ private void Update()
             return;
         }
 
+        if (manualRivalActionRoutine != null)
+        {
+            UpdateManualRivalOffBallSupport();
+            return;
+        }
+
         Transform carrier = rivalTeam[manualRivalOwnerIndex];
+        manualRivalDecisionTimer -= Time.deltaTime;
+
+        if (manualRivalDecisionTimer <= 0f && !IsRivalCloseToShoot(carrier))
+        {
+            int receiverIndex = FindBestRivalPassReceiver(carrier);
+
+            if (receiverIndex >= 0)
+            {
+                manualRivalActionRoutine = StartCoroutine(ManualRivalPassToReceiver(carrier, receiverIndex));
+                return;
+            }
+
+            manualRivalDecisionTimer = manualRivalDecisionInterval;
+        }
+
         Vector3 target = new Vector3(GetPlayerGoalLineX(), playerGroundY, goalCenterZ);
 
         MoveManualPlayerToward(carrier, rivalAnimators[manualRivalOwnerIndex], target, manualRivalPressureSpeed);
         AttachBall(carrier);
 
+        UpdateManualRivalOffBallSupport();
+    }
+
+    private void UpdateManualRivalOffBallSupport()
+    {
         for (int i = 0; i < rivalTeam.Length; i++)
         {
             if (!IsRivalPlayerAvailable(i) || i == manualRivalOwnerIndex) continue;
@@ -1551,6 +1628,69 @@ private void Update()
             Vector3 supportTarget = GetManualRivalSupportTarget(rivalTeam[i], i);
             MoveManualPlayerToward(rivalTeam[i], rivalAnimators[i], supportTarget, supportMoveSpeed);
         }
+    }
+
+    private bool IsRivalCloseToShoot(Transform carrier)
+    {
+        if (carrier == null) return false;
+
+        return Mathf.Abs(carrier.position.x - GetPlayerGoalLineX()) <= manualRivalShootDistance;
+    }
+
+    private int FindBestRivalPassReceiver(Transform passer)
+    {
+        if (passer == null) return -1;
+
+        int bestIndex = -1;
+        float bestScore = -9999f;
+        float attackDirection = Mathf.Sign(playerGoalX - rivalGoalX);
+
+        for (int i = 0; i < rivalTeam.Length; i++)
+        {
+            if (i == manualRivalOwnerIndex || !IsRivalPlayerAvailable(i)) continue;
+
+            Transform receiver = rivalTeam[i];
+            float distance = GetFlatDistance(passer.position, receiver.position);
+
+            if (distance < minPassDistance || distance > manualPassMaxDistance) continue;
+
+            float progress = (receiver.position.x - passer.position.x) * attackDirection;
+            float width = Mathf.Abs(receiver.position.z - passer.position.z);
+            float pressure = GetNearestOpponentDistance(Team.Rival, receiver.position);
+            float score = progress * 1.7f + width * 0.35f + pressure * 0.45f - distance * 0.12f + Random.Range(-0.5f, 0.5f);
+
+            if (score > bestScore)
+            {
+                bestScore = score;
+                bestIndex = i;
+            }
+        }
+
+        return bestIndex;
+    }
+
+    private IEnumerator ManualRivalPassToReceiver(Transform passer, int receiverIndex)
+    {
+        Transform receiver = IsRivalPlayerAvailable(receiverIndex) ? rivalTeam[receiverIndex] : null;
+
+        if (passer != null && receiver != null && ball != null)
+        {
+            Trigger(rivalAnimators[manualRivalOwnerIndex], PassHash);
+            AttachBall(passer);
+
+            Vector3 start = ball.position;
+            Vector3 end = GetBallPositionNear(receiver);
+
+            yield return MoveBallArc(start, end, manualRivalPassDuration, passArcHeight);
+
+            manualRivalOwnerIndex = receiverIndex;
+            ownerIndex = receiverIndex;
+            manualRivalDecisionTimer = manualRivalDecisionInterval;
+            Trigger(rivalAnimators[receiverIndex], ReceiveHash);
+            AttachBall(receiver);
+        }
+
+        manualRivalActionRoutine = null;
     }
 
     private Vector3 GetManualRivalSupportTarget(Transform rival, int index)
@@ -1572,6 +1712,7 @@ private void Update()
         manualBallAttached = false;
         manualBallReleaseTimer = 0f;
         manualStealCooldown = manualStealCooldownSeconds;
+        manualRivalDecisionTimer = manualRivalDecisionInterval * 0.5f;
         playerPossession = false;
         ownerIndex = rivalIndex;
 
@@ -1870,6 +2011,14 @@ private void CheckManualGoal()
 
 private IEnumerator ManualGoalReset(bool playerScored)
 {
+    if (manualRivalActionRoutine != null)
+    {
+        StopCoroutine(manualRivalActionRoutine);
+        manualRivalActionRoutine = null;
+    }
+
+    ShowGoalPanel(playerScored);
+
     if (playerScored)
     {
         ecuadorScore++;
@@ -1895,15 +2044,63 @@ private IEnumerator ManualGoalReset(bool playerScored)
         );
     }
 
-    yield return new WaitForSeconds(goalResetDelay);
+    yield return new WaitForSeconds(Mathf.Max(goalResetDelay, goalPanelSeconds));
 
+    ResetManualMatchPositions();
     manualBallAttached = true;
     manualBallReleaseTimer = 0f;
     manualStealCooldown = manualStealCooldownSeconds;
+    manualRivalDecisionTimer = manualRivalDecisionInterval;
 
     SelectManualPlayer(manualPlayerIndex);
 
+    HideGoalPanel();
     manualGoalResetRoutine = null;
+}
+
+private void ResetManualMatchPositions()
+{
+    for (int i = 0; i < playerTeam.Length; i++)
+    {
+        if (!IsManualPlayerAvailable(i)) continue;
+
+        playerTeam[i].position = playerBase[i];
+        playerTeam[i].rotation = playerBaseRotation[i];
+        playerBusy[i] = false;
+        SetSpeed(playerAnimators[i], 0f);
+    }
+
+    for (int i = 0; i < rivalTeam.Length; i++)
+    {
+        if (!IsRivalPlayerAvailable(i)) continue;
+
+        rivalTeam[i].position = rivalBase[i];
+        rivalTeam[i].rotation = rivalBaseRotation[i];
+        rivalBusy[i] = false;
+        SetSpeed(rivalAnimators[i], 0f);
+    }
+
+    if (ballRb != null)
+    {
+        if (!ballRb.isKinematic)
+        {
+            ballRb.linearVelocity = Vector3.zero;
+            ballRb.angularVelocity = Vector3.zero;
+        }
+
+        ballRb.useGravity = false;
+        ballRb.isKinematic = true;
+    }
+
+    manualRivalHasBall = false;
+    manualRivalOwnerIndex = -1;
+    manualRivalDecisionTimer = manualRivalDecisionInterval;
+
+    if (manualRivalActionRoutine != null)
+    {
+        StopCoroutine(manualRivalActionRoutine);
+        manualRivalActionRoutine = null;
+    }
 }
 
     private void AttachBall(Transform owner)
@@ -2012,6 +2209,97 @@ private IEnumerator ManualGoalReset(bool playerScored)
     {
         value = Mathf.Clamp01(value);
         return value * value * (3f - 2f * value);
+    }
+
+    private void EnsureGoalPanel()
+    {
+        if (!showGoalPanel || goalPanelObject != null)
+        {
+            return;
+        }
+
+        Canvas canvas = FindAnyObjectByType<Canvas>();
+
+        if (canvas == null)
+        {
+            GameObject canvasObject = new GameObject("FootballOS_Canvas");
+            canvas = canvasObject.AddComponent<Canvas>();
+            canvas.renderMode = RenderMode.ScreenSpaceOverlay;
+            canvasObject.AddComponent<CanvasScaler>();
+            canvasObject.AddComponent<GraphicRaycaster>();
+        }
+
+        goalPanelObject = new GameObject("FootballOS_GoalPanel");
+        goalPanelObject.transform.SetParent(canvas.transform, false);
+        goalPanelObject.transform.SetAsLastSibling();
+
+        RectTransform panelRect = goalPanelObject.AddComponent<RectTransform>();
+        panelRect.anchorMin = Vector2.zero;
+        panelRect.anchorMax = Vector2.one;
+        panelRect.offsetMin = Vector2.zero;
+        panelRect.offsetMax = Vector2.zero;
+
+        goalPanelImage = goalPanelObject.AddComponent<Image>();
+        goalPanelImage.raycastTarget = false;
+
+        goalPanelGroup = goalPanelObject.AddComponent<CanvasGroup>();
+        goalPanelGroup.alpha = 0f;
+        goalPanelGroup.blocksRaycasts = false;
+        goalPanelGroup.interactable = false;
+
+        GameObject textObject = new GameObject("GoalText");
+        textObject.transform.SetParent(goalPanelObject.transform, false);
+
+        RectTransform textRect = textObject.AddComponent<RectTransform>();
+        textRect.anchorMin = new Vector2(0.05f, 0.25f);
+        textRect.anchorMax = new Vector2(0.95f, 0.75f);
+        textRect.offsetMin = Vector2.zero;
+        textRect.offsetMax = Vector2.zero;
+
+        goalPanelText = textObject.AddComponent<TextMeshProUGUI>();
+        goalPanelText.alignment = TextAlignmentOptions.Center;
+        goalPanelText.fontSize = 78f;
+        goalPanelText.enableAutoSizing = true;
+        goalPanelText.fontSizeMin = 36f;
+        goalPanelText.fontSizeMax = 92f;
+        goalPanelText.fontStyle = FontStyles.Bold;
+        goalPanelText.color = Color.white;
+        goalPanelText.raycastTarget = false;
+
+        goalPanelObject.SetActive(false);
+    }
+
+    private void ShowGoalPanel(bool playerScored)
+    {
+        if (!showGoalPanel)
+        {
+            return;
+        }
+
+        EnsureGoalPanel();
+
+        if (goalPanelObject == null || goalPanelText == null || goalPanelImage == null || goalPanelGroup == null)
+        {
+            return;
+        }
+
+        goalPanelText.text = playerScored ? "GOOOL\nEquipo Team Player" : "GOOOL\nEquipo Team Rival";
+        goalPanelImage.color = playerScored ? playerGoalPanelColor : rivalGoalPanelColor;
+        goalPanelGroup.alpha = 1f;
+        goalPanelObject.SetActive(true);
+    }
+
+    private void HideGoalPanel()
+    {
+        if (goalPanelGroup != null)
+        {
+            goalPanelGroup.alpha = 0f;
+        }
+
+        if (goalPanelObject != null)
+        {
+            goalPanelObject.SetActive(false);
+        }
     }
 
     private void UpdateUI(string eventLog, string playerInControl, string action)

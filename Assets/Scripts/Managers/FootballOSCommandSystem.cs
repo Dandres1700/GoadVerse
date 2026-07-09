@@ -147,7 +147,7 @@ public class FootballOSCommandSystem : MonoBehaviour
 
     private void BuildUI()
     {
-        Canvas canvas = FindFirstObjectByType<Canvas>();
+        Canvas canvas = FindAnyObjectByType<Canvas>();
 
         if (canvas == null)
             return;

@@ -56,6 +56,10 @@ public class MundialSystemCameraController : MonoBehaviour
     private Transform ball;
     private bool introRunning;
     private bool tacticalCameraActive;
+    private bool introComplete;
+
+    public bool IsIntroRunning => introRunning;
+    public bool IsIntroComplete => !playIntroOnStart || introComplete;
 
     private void Start()
     {
@@ -71,10 +75,12 @@ public class MundialSystemCameraController : MonoBehaviour
 
         if (playIntroOnStart)
         {
+            introComplete = false;
             StartCoroutine(IntroRoutine());
         }
         else
         {
+            introComplete = true;
             tacticalCameraActive = true;
         }
     }
@@ -145,6 +151,7 @@ public class MundialSystemCameraController : MonoBehaviour
     // Activa cámara táctica final
     tacticalCameraActive = true;
     introRunning = false;
+    introComplete = true;
 }
 
     private void FollowBallTactical()

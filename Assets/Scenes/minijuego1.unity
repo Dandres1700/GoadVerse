@@ -4864,7 +4864,14 @@ MonoBehaviour:
   manualRivalStealDistance: 1.5
   manualRecoverDistance: 1.8
   manualStealCooldownSeconds: 1
+  manualRivalDecisionInterval: 1.4
+  manualRivalPassDuration: 0.55
+  manualRivalShootDistance: 12
   manualPlayerKeepsBall: 1
+  showGoalPanel: 1
+  goalPanelSeconds: 2
+  playerGoalPanelColor: {r: 0.05, g: 0.85, b: 1, a: 0.82}
+  rivalGoalPanelColor: {r: 1, g: 0.12, b: 0.08, a: 0.82}
   defensivePressureDistance: 2.2
   defensiveMarkingBlend: 0.45
   passLaneRiskPenalty: 5
