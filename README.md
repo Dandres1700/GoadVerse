@@ -1,20 +1,27 @@
 # GoadVerse
 
 GoadVerse es un juego 3D hecho en Unity. El flujo actual inicia en un
-`Bootstrap`, carga el menu principal, permite entrar al `Lobby` y desde ahi
-usar el portal de futbol para entrar al `minijuego1`.
+`Bootstrap`, carga el menu principal, reproduce la secuencia de introduccion e
+historia, permite entrar al `Lobby` y desde ahi usar el portal de futbol para
+entrar al `minijuego1`.
 
 ## Estado actual del juego
 
 - Menu principal con fondo personalizado, botones visuales, musica de inicio y
   copa 3D giratoria frente al fondo.
+- Boton `Play` con secuencia narrativa: video de instrucciones, video de
+  historia con narracion y entrada automatica al lobby.
+- Panel `Settings` del menu principal con controles del juego.
 - Lobby con personaje, camara en tercera persona y portal interactivo.
+- Boton de salida en el lobby.
 - Entrada al minijuego de futbol al acercarse al portal y presionar `E`.
 - Movimiento 3D con teclado y mando.
 - Camara con seguimiento del jugador y zoom con scroll del mouse.
 - Animaciones base de caminar, correr, saltar y acciones de futbol.
 - Paredes invisibles para delimitar el lobby y la cancha del minijuego.
 - Balon del minijuego ajustado de escala, con rebote y respuesta al patearlo.
+- UI del minijuego con botones de pausa, configuracion, controles y salida al
+  lobby.
 - Demo Football OS en `minijuego1` con jugadores de prueba, balon, camara
   cinematic/override y acciones de pase/recepcion.
 - Copa giratoria en el lobby/menu con posicion controlada por escena.
@@ -46,8 +53,17 @@ Las escenas activas en Build Settings son:
 El juego arranca en `Bootstrap`. Esa escena mantiene los managers globales y
 carga `Menu_Principal` usando `SceneLoader`.
 
-Desde `Menu_Principal`, el boton `Play` llama a `MainMenuManager.OnJugarPressed`
-y carga `Lobby`.
+Desde `Menu_Principal`, el boton `Play` llama a `MainMenuManager.OnJugarPressed`.
+Primero reproduce `Assets/Historia/Instrucciones.mp4`. Al terminar, reproduce
+`Assets/Historia/Historia.mp4` junto con `Assets/Historia/Historia_narrada.mp3`.
+Cuando finalizan el video de historia y la narracion, carga `Lobby`.
+
+Para builds `.exe`, `MainMenuManager` busca esos archivos en
+`StreamingAssets/Historia`. El script de editor
+`HistoriaStreamingAssetsBuildProcessor` copia automaticamente los archivos desde
+`Assets/Historia` hacia `Assets/StreamingAssets/Historia` antes de generar el
+build. Tambien se puede ejecutar manualmente desde el menu de Unity:
+`GoadVerse -> Sync Historia Streaming Assets`.
 
 `Menu_Principal` usa un fondo 2D en `Canvas3D` y una copa 3D por delante. Ese
 canvas esta renderizado por camara para que el fondo no tape la copa. La copa se
@@ -75,7 +91,14 @@ Teclado:
 
 Pruebas de animaciones de futbol en `minijuego1`:
 
-- `O`: tiro.
+- `WASD` / flechas: mover jugador del Team Player.
+- `E` / `Tab`: cambiar jugador.
+- `O`: patear o pasar el balon.
+- Boton `PAUSA`: detener o reanudar el partido.
+- Boton `SETTINGS`: ver controles y salir al lobby.
+
+Pruebas de animaciones auxiliares en `minijuego1`:
+
 - `P`: pase.
 - `R`: recibir.
 - `T`: tackle.
@@ -102,10 +125,14 @@ El proyecto esta organizado por responsabilidades:
 - `Assets/Scripts/Interactables`: portal hacia minijuegos.
 - `Assets/Scripts/UI`: comportamiento visual de elementos como la copa.
 - `Assets/Scripts/ButtonHoverEffect`: efectos de hover para botones del menu.
+- `Assets/Editor`: utilidades de editor, incluyendo copia de archivos de
+  historia para builds.
 - `Assets/Scenes`: escenas jugables y flujo principal.
 - `Assets/Maps`: mapa/cancha del minijuego.
 - `Assets/Animations`: animaciones del personaje y acciones de futbol.
 - `Assets/Audio`: musica, sonidos de botones y audio de inicio.
+- `Assets/Historia`: videos y audio de la introduccion narrativa.
+- `Assets/Resources`: configuracion editable de UI runtime.
 - `Assets/Textures/Menu_Inicio`: fondos e imagenes del menu principal.
 - `Assets/Textures/UI`: paquetes de UI/VFX importados y organizados.
 - `Assets/Textures` y `Assets/Models`: modelos, imagenes y texturas generales.
@@ -144,6 +171,22 @@ Valores actuales de la copa del menu:
 - Rotation: `X 0`, `Y 0`, `Z 0`.
 - Scale: `X 350`, `Y 350`, `Z 350`.
 
+Para ajustar UI runtime del menu, lobby y minijuego:
+
+1. Seleccionar `Assets/Resources/SceneUtilityUISettings.asset`.
+2. Editar posiciones, tamanos, textos, colores o nombres de archivos.
+3. Dar Play para ver los valores aplicados.
+
+Para preparar el `.exe`:
+
+1. Verificar que `Assets/Historia` contenga:
+   `Instrucciones.mp4`, `Historia.mp4` y `Historia_narrada.mp3`.
+2. Generar el build normalmente desde Unity. Antes del build,
+   `HistoriaStreamingAssetsBuildProcessor` copia esos archivos a
+   `StreamingAssets`.
+3. Si se quiere sincronizar manualmente antes de construir, usar
+   `GoadVerse -> Sync Historia Streaming Assets`.
+
 ## Convenciones de trabajo
 
 - Guardar escenas antes de subir cambios.
@@ -151,8 +194,12 @@ Valores actuales de la copa del menu:
 - Mantener assets importados en carpetas separadas por origen.
 - Agregar credito y licencia cuando se importe un asset externo.
 - Probar el flujo completo: `Bootstrap -> Menu_Principal -> Lobby -> minijuego1`.
+- Probar tambien el flujo narrativo:
+  `Play -> Instrucciones.mp4 -> Historia.mp4 + Historia_narrada.mp3 -> Lobby`.
 - Revisar el menu principal despues de tocar el Canvas o la copa, porque el
   fondo debe quedar detras del modelo 3D.
+- Antes de distribuir un `.exe`, confirmar que los videos de historia se
+  copiaron a `StreamingAssets/Historia`.
 - En escenas serializadas de Unity, limpiar cualquier conflicto de merge antes
   de abrir Play Mode.
 
@@ -163,6 +210,7 @@ importados en este proyecto:
 
 - "Copa mundial - Cup World" (https://skfb.ly/pKnU6) by marcoseec is licensed under Creative Commons Attribution (http://creativecommons.org/licenses/by/4.0/).
 - "Craven Cottage Stadium - Game Ready Asset (FREE)" (https://sketchfab.com/3d-models/craven-cottage-stadium-game-ready-asset-free-32ffa67d18974419aac433d64a223b12) by HxZy is licensed under Creative Commons Attribution (http://creativecommons.org/licenses/by/4.0/).
+- "Soccer Goal" (https://skfb.ly/pD9X8) by TepidGames is licensed under Creative Commons Attribution (http://creativecommons.org/licenses/by/4.0/).
 - "Human Basic Motions FREE" (https://kevdev.itch.io/basic-motions-free) by Kevin Iglesias is used under the asset terms for the pack / Standard Unity Asset Store EULA.
 - Mixamo animations (https://www.mixamo.com/) by Adobe Mixamo are used for soccer/action animation prototyping. Adobe's Mixamo FAQ states that characters and animations can be used royalty-free in personal, commercial and non-profit projects, including video games.
 - "Bloodlines - Dark UI" (https://xgaida.itch.io/bloodlines-ui) by xGaida and Shieldomirs is used for UI assets. The package states it is free for personal and commercial projects and should not be resold or repackaged as raw assets.
