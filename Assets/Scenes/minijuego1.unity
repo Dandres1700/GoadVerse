@@ -4824,7 +4824,7 @@ MonoBehaviour:
   passArcHeight: 0.45
   useFixedInitialBallTransform: 1
   initialBallPosition: {x: -7.2, y: 0.43, z: -15.2}
-  initialBallScale: {x: 2, y: 2, z: 2}
+  initialBallScale: {x: 1.8, y: 1.8, z: 1.8}
   centerX: -4
   playerGoalZ: -14
   rivalGoalZ: 15
@@ -5247,7 +5247,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: -7.2, y: 0.43, z: -15.2}
-  m_LocalScale: {x: 2, y: 2, z: 2}
+  m_LocalScale: {x: 1.8, y: 1.8, z: 1.8}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
@@ -5265,7 +5265,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   forceHalfScale: 1
-  halfScale: {x: 2, y: 2, z: 2}
+  halfScale: {x: 1.8, y: 1.8, z: 1.8}
   bounceForce: 0.5
   dynamicFriction: 0
   staticFriction: 0

@@ -30,7 +30,7 @@ public class FootballOSFullMatchController : MonoBehaviour
     [SerializeField] private float passArcHeight = 0.45f;
     [SerializeField] private bool useFixedInitialBallTransform = true;
     [SerializeField] private Vector3 initialBallPosition = new Vector3(-7.2f, 0.43f, -15.2f);
-    [SerializeField] private Vector3 initialBallScale = new Vector3(2f, 2f, 2f);
+    [SerializeField] private Vector3 initialBallScale = new Vector3(1.8f, 1.8f, 1.8f);
 
     [Header("Campo")]
     [SerializeField] private float centerX = -4f;
@@ -62,6 +62,8 @@ public class FootballOSFullMatchController : MonoBehaviour
     [SerializeField] private float manualWalkSpeed = 5f;
     [SerializeField] private float manualRunSpeed = 8f;
     [SerializeField] private float manualTurnSpeed = 12f;
+    [SerializeField] private float manualAiTurnSpeed = 7.5f;
+    [SerializeField] private float animationSpeedDampTime = 0.12f;
     [SerializeField] private float manualKickForce = 8f;
     [SerializeField] private float manualKickLift = 0.12f;
     [SerializeField] private float manualKickDelay = 0.15f;
@@ -79,8 +81,12 @@ public class FootballOSFullMatchController : MonoBehaviour
     [SerializeField] private float manualRivalDecisionInterval = 1.4f;
     [SerializeField] private float manualRivalPassDuration = 0.55f;
     [SerializeField] private float manualRivalShootDistance = 12f;
+    [SerializeField] private float manualRivalShotForceMultiplier = 0.92f;
+    [SerializeField] private float manualRivalDribblePressureDistance = 6f;
     [SerializeField] private bool manualPlayerKeepsBall = true;
     [SerializeField] private bool attachBallToManualPlayerOnStart = false;
+    [SerializeField] private Color manualControlledRingColor = Color.green;
+    [SerializeField] private Color manualAvailableRingColor = new Color(1f, 0.92f, 0.02f, 1f);
 
     [Header("Panel de gol")]
     [SerializeField] private bool showGoalPanel = true;
@@ -140,7 +146,7 @@ public class FootballOSFullMatchController : MonoBehaviour
     private bool ready;
     private bool playerPossession = true;
     private int ownerIndex = 6;
-    private bool manualBallAttached = true;
+    private bool manualBallAttached;
     private float manualBallReleaseTimer;
     private Coroutine manualKickRoutine;
     private bool manualRivalHasBall;
@@ -1179,21 +1185,6 @@ private void Update()
         Trigger(playerAnimators[manualPlayerIndex], ShootHash);
         SetSpeed(playerAnimators[manualPlayerIndex], 0f);
 
-        int receiverIndex = ShouldManualShoot(player) ? -1 : FindBestManualPassReceiver(player);
-
-        if (receiverIndex >= 0)
-        {
-            manualKickRoutine = StartCoroutine(ManualPassToReceiver(player, receiverIndex));
-
-            UpdateUI(
-                "- Pase manual con O\n- El receptor queda listo para controlar",
-                GetName(Team.Player, receiverIndex),
-                "Pass"
-            );
-
-            return;
-        }
-
         manualKickRoutine = StartCoroutine(ManualKickAfterDelay(player));
 
         UpdateUI(
@@ -1254,16 +1245,41 @@ private void Update()
         manualBallAttached = false;
         manualBallReleaseTimer = manualKickReleaseSeconds;
 
-        Vector3 goalTarget = new Vector3(GetRivalGoalLineX() + Mathf.Sign(rivalGoalX - playerGoalX) * 2f, ball.position.y, goalCenterZ);
-        Vector3 direction = goalTarget - ball.position;
+        Vector3 direction = player.forward;
         direction.y = 0f;
-        direction += Vector3.up * manualKickLift;
 
         if (direction.sqrMagnitude < 0.001f)
         {
-            direction = player.forward + Vector3.up * manualKickLift;
+            Vector3 goalTarget = new Vector3(GetRivalGoalLineX() + Mathf.Sign(rivalGoalX - playerGoalX) * 2f, ball.position.y, goalCenterZ);
+            direction = goalTarget - ball.position;
+            direction.y = 0f;
         }
 
+        ReleaseBallInDirection(direction, manualKickForce);
+    }
+
+    private void ReleaseBallToward(Vector3 target, float force)
+    {
+        if (ball == null) return;
+
+        Vector3 direction = target - ball.position;
+        direction.y = 0f;
+
+        ReleaseBallInDirection(direction, force);
+    }
+
+    private void ReleaseBallInDirection(Vector3 direction, float force)
+    {
+        if (ball == null) return;
+
+        direction.y = 0f;
+
+        if (direction.sqrMagnitude < 0.001f)
+        {
+            direction = Vector3.right * Mathf.Sign(rivalGoalX - playerGoalX);
+        }
+
+        direction += Vector3.up * manualKickLift;
         direction.Normalize();
 
         if (ballRb != null)
@@ -1272,11 +1288,11 @@ private void Update()
             ballRb.useGravity = true;
             ballRb.linearVelocity = Vector3.zero;
             ballRb.angularVelocity = Vector3.zero;
-            ballRb.AddForce(direction * manualKickForce, ForceMode.Impulse);
+            ballRb.AddForce(direction * force, ForceMode.Impulse);
         }
         else
         {
-            ball.position += direction * manualKickForce * Time.deltaTime;
+            ball.position += direction * force * Time.deltaTime;
         }
     }
 
@@ -1353,20 +1369,20 @@ private void Update()
 
     private void HandleManualPlayerSelectionInput()
     {
-        if (Input.GetKeyDown(KeyCode.Alpha1)) SelectManualPlayer(0);
-        if (Input.GetKeyDown(KeyCode.Alpha2)) SelectManualPlayer(1);
-        if (Input.GetKeyDown(KeyCode.Alpha3)) SelectManualPlayer(2);
-        if (Input.GetKeyDown(KeyCode.Alpha4)) SelectManualPlayer(3);
-        if (Input.GetKeyDown(KeyCode.Alpha5)) SelectManualPlayer(4);
-        if (Input.GetKeyDown(KeyCode.Alpha6)) SelectManualPlayer(5);
-        if (Input.GetKeyDown(KeyCode.Alpha7)) SelectManualPlayer(6);
-        if (Input.GetKeyDown(KeyCode.Alpha8)) SelectManualPlayer(7);
-        if (Input.GetKeyDown(KeyCode.Alpha9)) SelectManualPlayer(8);
-        if (Input.GetKeyDown(KeyCode.Alpha0)) SelectManualPlayer(9);
+        if (Input.GetKeyDown(KeyCode.Alpha1)) SelectManualPlayer(0, false);
+        if (Input.GetKeyDown(KeyCode.Alpha2)) SelectManualPlayer(1, false);
+        if (Input.GetKeyDown(KeyCode.Alpha3)) SelectManualPlayer(2, false);
+        if (Input.GetKeyDown(KeyCode.Alpha4)) SelectManualPlayer(3, false);
+        if (Input.GetKeyDown(KeyCode.Alpha5)) SelectManualPlayer(4, false);
+        if (Input.GetKeyDown(KeyCode.Alpha6)) SelectManualPlayer(5, false);
+        if (Input.GetKeyDown(KeyCode.Alpha7)) SelectManualPlayer(6, false);
+        if (Input.GetKeyDown(KeyCode.Alpha8)) SelectManualPlayer(7, false);
+        if (Input.GetKeyDown(KeyCode.Alpha9)) SelectManualPlayer(8, false);
+        if (Input.GetKeyDown(KeyCode.Alpha0)) SelectManualPlayer(9, false);
 
         if (Input.GetKeyDown(switchManualPlayerKey) || Input.GetKeyDown(KeyCode.Tab))
         {
-            SelectManualPlayer(GetNextManualPlayerIndex(manualPlayerIndex));
+            SelectManualPlayer(GetNextManualPlayerIndex(manualPlayerIndex), false);
         }
     }
 
@@ -1404,11 +1420,26 @@ private void Update()
             manualKickRoutine = null;
         }
 
+        bool wasBallAttached = manualBallAttached;
+
         manualPlayerIndex = selectableIndex;
         ownerIndex = manualRivalHasBall ? manualRivalOwnerIndex : manualPlayerIndex;
         playerPossession = !manualRivalHasBall;
         manualBallAttached = !manualRivalHasBall && manualPlayerKeepsBall && attachBallToSelected;
-        manualBallReleaseTimer = 0f;
+
+        if (manualBallAttached)
+        {
+            manualBallReleaseTimer = 0f;
+        }
+        else if (!manualRivalHasBall)
+        {
+            if (wasBallAttached)
+            {
+                DetachBallInPlace();
+            }
+
+            manualBallReleaseTimer = Mathf.Max(manualBallReleaseTimer, 0.25f);
+        }
 
         for (int i = 0; i < playerBusy.Length; i++)
         {
@@ -1420,11 +1451,48 @@ private void Update()
             AttachBall(playerTeam[manualPlayerIndex]);
         }
 
+        UpdateManualSelectionRings();
+
         UpdateUI(
             "- Control manual activo\n- WASD mueve, E cambia jugador, O patea",
             GetName(Team.Player, manualPlayerIndex),
             "Manual Control"
         );
+    }
+
+    private void DetachBallInPlace()
+    {
+        manualBallAttached = false;
+
+        if (ballRb == null) return;
+
+        if (!ballRb.isKinematic)
+        {
+            ballRb.linearVelocity = Vector3.zero;
+            ballRb.angularVelocity = Vector3.zero;
+        }
+
+        ballRb.useGravity = true;
+        ballRb.isKinematic = false;
+    }
+
+    private void UpdateManualSelectionRings()
+    {
+        for (int i = 0; i < playerTeam.Length; i++)
+        {
+            if (playerTeam[i] == null) continue;
+
+            Color color = i == manualPlayerIndex ? manualControlledRingColor : manualAvailableRingColor;
+            SelectionRingLine[] rings = playerTeam[i].GetComponentsInChildren<SelectionRingLine>(true);
+
+            foreach (SelectionRingLine ring in rings)
+            {
+                if (ring != null)
+                {
+                    ring.SetRingColor(color);
+                }
+            }
+        }
     }
 
     private int GetAvailableManualPlayerCount()
@@ -1575,19 +1643,37 @@ private void Update()
             return;
         }
 
+        int primaryPresser = FindNearestAvailableRivalTo(ball.position);
+        Transform controlledPlayer = IsManualPlayerAvailable(manualPlayerIndex) ? playerTeam[manualPlayerIndex] : null;
+
         for (int i = 0; i < rivalTeam.Length; i++)
         {
             if (!IsRivalPlayerAvailable(i)) continue;
 
             Transform rival = rivalTeam[i];
-            bool shouldPress = IsOneOfClosestToBall(false, i, 2);
-            Vector3 target = shouldPress
-                ? ClampToField(ball.position)
-                : GetManualRivalSupportTarget(rival, i);
+            bool shouldPress = i == primaryPresser;
+            Vector3 target;
+            float speed;
 
-            MoveManualPlayerToward(rival, rivalAnimators[i], target, manualRivalPressureSpeed);
+            if (shouldPress)
+            {
+                target = ClampToField(ball.position);
+                speed = manualRivalPressureSpeed;
+            }
+            else if (controlledPlayer != null && GetFlatDistance(rival.position, controlledPlayer.position) <= manualRivalDribblePressureDistance * 1.4f)
+            {
+                target = GetManualRivalMarkingTarget(rival, controlledPlayer);
+                speed = supportMoveSpeed;
+            }
+            else
+            {
+                target = GetManualRivalSupportTarget(rival, i);
+                speed = supportMoveSpeed;
+            }
 
-            if (manualStealCooldown <= 0f && GetFlatDistance(rival.position, ball.position) <= manualRivalStealDistance)
+            MoveManualPlayerToward(rival, rivalAnimators[i], target, speed);
+
+            if (shouldPress && manualStealCooldown <= 0f && GetFlatDistance(rival.position, ball.position) <= manualRivalStealDistance)
             {
                 ManualRivalSteal(i);
                 return;
@@ -1613,7 +1699,13 @@ private void Update()
         Transform carrier = rivalTeam[manualRivalOwnerIndex];
         manualRivalDecisionTimer -= Time.deltaTime;
 
-        if (manualRivalDecisionTimer <= 0f && !IsRivalCloseToShoot(carrier))
+        if (manualRivalDecisionTimer <= 0f && IsRivalCloseToShoot(carrier))
+        {
+            manualRivalActionRoutine = StartCoroutine(ManualRivalShootAtGoal(carrier, manualRivalOwnerIndex));
+            return;
+        }
+
+        if (manualRivalDecisionTimer <= 0f)
         {
             int receiverIndex = FindBestRivalPassReceiver(carrier);
 
@@ -1626,7 +1718,7 @@ private void Update()
             manualRivalDecisionTimer = manualRivalDecisionInterval;
         }
 
-        Vector3 target = new Vector3(GetPlayerGoalLineX(), playerGroundY, goalCenterZ);
+        Vector3 target = GetManualRivalCarryTarget(carrier);
 
         MoveManualPlayerToward(carrier, rivalAnimators[manualRivalOwnerIndex], target, manualRivalPressureSpeed);
         AttachBall(carrier);
@@ -1672,7 +1764,20 @@ private void Update()
             float progress = (receiver.position.x - passer.position.x) * attackDirection;
             float width = Mathf.Abs(receiver.position.z - passer.position.z);
             float pressure = GetNearestOpponentDistance(Team.Rival, receiver.position);
-            float score = progress * 1.7f + width * 0.35f + pressure * 0.45f - distance * 0.12f + Random.Range(-0.5f, 0.5f);
+            float laneRisk = GetPassLaneRisk(Team.Rival, passer.position, receiver.position);
+            float goalLane = Mathf.Abs(receiver.position.z - goalCenterZ);
+            float score = progress * 1.9f
+                + width * 0.25f
+                + pressure * 0.5f
+                - distance * 0.12f
+                - laneRisk * passLaneRiskPenalty
+                - goalLane * 0.05f
+                + Random.Range(-0.5f, 0.5f);
+
+            if (progress < -2f)
+            {
+                score -= 5f;
+            }
 
             if (score > bestScore)
             {
@@ -1708,14 +1813,155 @@ private void Update()
         manualRivalActionRoutine = null;
     }
 
+    private IEnumerator ManualRivalShootAtGoal(Transform shooter, int shooterIndex)
+    {
+        if (shooter == null || ball == null)
+        {
+            manualRivalActionRoutine = null;
+            yield break;
+        }
+
+        Trigger(rivalAnimators[shooterIndex], ShootHash);
+        SetSpeed(rivalAnimators[shooterIndex], 0f);
+        LookAtFlatSmooth(shooter, new Vector3(GetPlayerGoalLineX(), playerGroundY, goalCenterZ), manualAiTurnSpeed * 1.5f);
+
+        if (manualKickDelay > 0f)
+        {
+            yield return new WaitForSeconds(manualKickDelay);
+        }
+
+        if (shooter != null && ball != null)
+        {
+            AttachBall(shooter);
+
+            manualRivalHasBall = false;
+            manualRivalOwnerIndex = -1;
+            manualBallAttached = false;
+            manualBallReleaseTimer = manualKickReleaseSeconds;
+            manualStealCooldown = manualStealCooldownSeconds;
+            playerPossession = false;
+            ownerIndex = shooterIndex;
+
+            float attackDirection = Mathf.Sign(playerGoalX - rivalGoalX);
+            Vector3 goalTarget = new Vector3(
+                GetPlayerGoalLineX() + attackDirection * 3f,
+                ball.position.y,
+                goalCenterZ + Random.Range(-goalWidth * 0.22f, goalWidth * 0.22f)
+            );
+
+            ReleaseBallToward(goalTarget, manualKickForce * manualRivalShotForceMultiplier);
+
+            UpdateUI(
+                "- Team Rival remata al arco\n- Recupera el balon si rebota",
+                GetName(Team.Rival, shooterIndex),
+                "Shoot"
+            );
+        }
+
+        manualRivalDecisionTimer = manualRivalDecisionInterval;
+        manualRivalActionRoutine = null;
+    }
+
     private Vector3 GetManualRivalSupportTarget(Transform rival, int index)
     {
-        float side = index % 2 == 0 ? 1f : -1f;
-        Vector3 target = ball.position
-            + Vector3.right * Mathf.Sign(playerGoalX - rivalGoalX) * 8f
-            + Vector3.forward * side * 7f;
+        Vector3 reference = manualRivalHasBall && IsRivalPlayerAvailable(manualRivalOwnerIndex)
+            ? rivalTeam[manualRivalOwnerIndex].position
+            : ball.position;
+
+        float attackDirection = Mathf.Sign(playerGoalX - rivalGoalX);
+        float lane = GetManualRivalLaneOffset(index);
+        float depth = manualRivalHasBall ? 9f + index % 3 * 2f : 5f + index % 2 * 2f;
+
+        Vector3 target = new Vector3(
+            reference.x + attackDirection * depth,
+            playerGroundY,
+            Mathf.Lerp(reference.z, goalCenterZ + lane, 0.72f)
+        );
 
         return ClampToField(target);
+    }
+
+    private Vector3 GetManualRivalCarryTarget(Transform carrier)
+    {
+        if (carrier == null)
+        {
+            return ClampToField(new Vector3(GetPlayerGoalLineX(), playerGroundY, goalCenterZ));
+        }
+
+        float attackDirection = Mathf.Sign(playerGoalX - rivalGoalX);
+        Vector3 target = new Vector3(
+            carrier.position.x + attackDirection * 8f,
+            playerGroundY,
+            Mathf.Lerp(carrier.position.z, goalCenterZ, 0.35f)
+        );
+
+        Transform nearestPlayer = GetNearestOpponent(Team.Rival, carrier.position);
+
+        if (nearestPlayer != null)
+        {
+            float pressureDistance = GetFlatDistance(carrier.position, nearestPlayer.position);
+            float pressure = Mathf.Clamp01((manualRivalDribblePressureDistance - pressureDistance) / manualRivalDribblePressureDistance);
+
+            if (pressure > 0f)
+            {
+                Vector3 away = carrier.position - nearestPlayer.position;
+                away.y = 0f;
+
+                if (away.sqrMagnitude > 0.001f)
+                {
+                    target += away.normalized * pressure * 4f;
+                    target += Vector3.right * attackDirection * pressure * 3f;
+                }
+            }
+        }
+
+        return ClampToField(target);
+    }
+
+    private Vector3 GetManualRivalMarkingTarget(Transform rival, Transform targetPlayer)
+    {
+        if (rival == null || targetPlayer == null)
+        {
+            return rival != null ? rival.position : Vector3.zero;
+        }
+
+        float attackDirection = Mathf.Sign(playerGoalX - rivalGoalX);
+        Vector3 offset = Vector3.right * attackDirection * 2.4f;
+
+        return ClampToField(targetPlayer.position + offset);
+    }
+
+    private float GetManualRivalLaneOffset(int index)
+    {
+        int lane = Mathf.Abs(index) % 5;
+
+        if (lane == 0) return 0f;
+        if (lane == 1) return -12f;
+        if (lane == 2) return 12f;
+        if (lane == 3) return -6f;
+
+        return 6f;
+    }
+
+    private int FindNearestAvailableRivalTo(Vector3 position)
+    {
+        int bestIndex = -1;
+        float bestDistance = 9999f;
+
+        for (int i = 0; i < rivalTeam.Length; i++)
+        {
+            if (!IsRivalPlayerAvailable(i)) continue;
+
+            float distance = GetFlatDistance(rivalTeam[i].position, position);
+
+            if (distance < bestDistance)
+            {
+                bestDistance = distance;
+                bestIndex = i;
+            }
+        }
+
+        return bestIndex;
     }
 
     private void ManualRivalSteal(int rivalIndex)
@@ -1745,19 +1991,24 @@ private void Update()
     {
         if (player == null) return;
 
-        Vector3 start = player.position;
         target = ClampToField(target);
+        Vector3 toTarget = target - player.position;
+        toTarget.y = 0f;
+        float distance = toTarget.magnitude;
 
-        if (GetFlatDistance(start, target) > 0.05f)
+        if (distance > 0.08f)
         {
-            LookAtFlat(player, target);
-            player.position = Vector3.MoveTowards(player.position, target, speed * Time.deltaTime);
-            SetSpeed(animator, 0.45f);
+            Vector3 direction = toTarget / distance;
+            RotateFlatSmooth(player, direction, manualAiTurnSpeed);
+            player.position = ClampToField(player.position + direction * Mathf.Min(speed * Time.deltaTime, distance));
+
+            float animationSpeed = Mathf.Clamp(speed / Mathf.Max(0.01f, manualRunSpeed), 0.35f, 0.85f);
+            SetSpeed(animator, animationSpeed);
         }
         else
         {
             SetSpeed(animator, 0f);
-            LookAtFlat(player, ball != null ? ball.position : target);
+            LookAtFlatSmooth(player, ball != null ? ball.position : target, manualAiTurnSpeed * 0.65f);
         }
     }
 
@@ -2177,12 +2428,43 @@ private void ResetManualMatchPositions()
         who.rotation = Quaternion.LookRotation(direction);
     }
 
+    private void LookAtFlatSmooth(Transform who, Vector3 target, float turnSpeed)
+    {
+        if (who == null) return;
+
+        Vector3 direction = target - who.position;
+        direction.y = 0f;
+
+        RotateFlatSmooth(who, direction, turnSpeed);
+    }
+
+    private void RotateFlatSmooth(Transform who, Vector3 direction, float turnSpeed)
+    {
+        if (who == null) return;
+
+        direction.y = 0f;
+
+        if (direction.sqrMagnitude < 0.001f) return;
+
+        Quaternion targetRotation = Quaternion.LookRotation(direction.normalized);
+        float blend = Mathf.Clamp01(turnSpeed * Time.deltaTime);
+        who.rotation = Quaternion.Slerp(who.rotation, targetRotation, blend);
+    }
+
     private void SetSpeed(Animator animator, float value)
     {
         if (animator == null) return;
         if (!HasAnimatorParameter(animator, SpeedHash, AnimatorControllerParameterType.Float)) return;
 
-        animator.SetFloat(SpeedHash, value);
+        value = Mathf.Clamp01(value);
+
+        if (animationSpeedDampTime <= 0f || Time.deltaTime <= 0f)
+        {
+            animator.SetFloat(SpeedHash, value);
+            return;
+        }
+
+        animator.SetFloat(SpeedHash, value, animationSpeedDampTime, Time.deltaTime);
     }
 
     private void Trigger(Animator animator, int hash)

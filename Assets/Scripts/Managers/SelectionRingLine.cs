@@ -64,4 +64,19 @@ public class SelectionRingLine : MonoBehaviour
             line.SetPosition(i, new Vector3(x, heightOffset, z));
         }
     }
+
+    public void SetRingColor(Color color)
+    {
+        ringColor = color;
+
+        if (line == null)
+        {
+            line = GetComponent<LineRenderer>();
+        }
+
+        if (line == null) return;
+
+        line.startColor = ringColor;
+        line.endColor = ringColor;
+    }
 }
